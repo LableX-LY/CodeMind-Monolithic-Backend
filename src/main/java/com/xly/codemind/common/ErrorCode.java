@@ -18,6 +18,8 @@ public enum ErrorCode {
 
     NO_AUTH_ERROR(40101,"无权限",""),
 
+    USER_BAN_ERROR(40105,"用户被禁",""),
+
     SYSTEM_ERROR(50000,"系统内部异常",""),
 
     NULL_ERROR(40002,"查询结果为空","");;

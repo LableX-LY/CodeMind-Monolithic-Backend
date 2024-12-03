@@ -17,6 +17,8 @@
             <result property="userProfile" column="userProfile" jdbcType="VARCHAR"/>
             <result property="userRole" column="userRole" jdbcType="VARCHAR"/>
             <result property="userStatus" column="userStatus" jdbcType="INTEGER"/>
+            <result property="bannedTime" column="bannedTime" jdbcType="TIMESTAMP"/>
+            <result property="unbannedTime" column="unbannedTime" jdbcType="TIMESTAMP"/>
             <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
             <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
             <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
@@ -27,6 +29,7 @@
         userName,userAvatar,userGender,
         userBirthday,userEmail,userTags,
         userProfile,userRole,userStatus,
-        createTime,updateTime,isDelete
+        bannedTime,unbannedTime,createTime,
+        updateTime,isDelete
     </sql>
 </mapper>

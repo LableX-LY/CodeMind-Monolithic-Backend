@@ -2,7 +2,9 @@ package com.xly.codemind.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xly.codemind.model.bean.User;
+import com.xly.codemind.model.vo.LoginUserVO;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 
@@ -13,6 +15,29 @@ import java.util.List;
 */
 public interface UserService extends IService<User> {
 
-    List<User> getUserList();
+    /**
+     * 用户注册
+     * @param userAccount 账号
+     * @param userPassword 密码
+     * @param checkedPassword 确认密码
+     * @return 注册成功后的用户id
+     */
+    Long userRegister(String userAccount, String userPassword,String checkedPassword);
+
+    /**
+     * 用户登录
+     * @param userAccount 账号
+     * @param userPassword 密码
+     * @param request HttpServletRequest
+     * @return 用户登录视图（脱敏）
+     */
+    LoginUserVO userLogin(String userAccount, String userPassword, HttpServletRequest request);
+
+    /**
+     * 用户退出登录（注销）
+     * @param request HttpServletRequest
+     * @return 是否成功退出登录
+     */
+    Boolean userLogout(HttpServletRequest request);
 
 }
