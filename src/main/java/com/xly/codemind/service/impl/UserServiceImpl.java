@@ -78,7 +78,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号已存在,请重新输入!");
         }
         //密码MD5加密
-        String encryptedPassword = DigestUtils.md5DigestAsHex((SALT + "password").getBytes());
+        String encryptedPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
         //保存用户,昵称默认为账号；头像、用户标签、用户简介有默认值
         User user = new User();
         user.setUserAccount(userAccount);
@@ -90,6 +90,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         user.setUserRole("user");
         user.setUserStatus(0);
         long id = IdWorker.getInstance().nextId();
+        if (id < 0) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"系统内部异常,id生成失败!");
+        }
         user.setId(id);
         int insert = userMapper.insert(user);
         if (insert < 0) {
@@ -128,10 +131,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if(userPasswordmatcher.find()){
             throw  new BusinessException(ErrorCode.PARAMS_ERROR,"密码包含禁止使用的特殊字符!");
         }
-        String encryptedPassword = DigestUtils.md5DigestAsHex((SALT + "password").getBytes());
+        String encryptedPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
         //账号密码匹配且没有被Ban
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.eq("userAccount",userAccount).eq("userPassword",userPassword);
+        userQueryWrapper.eq("userAccount",userAccount).eq("userPassword",encryptedPassword);
         User user = userMapper.selectOne(userQueryWrapper);
         if (user == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号或密码错误!");

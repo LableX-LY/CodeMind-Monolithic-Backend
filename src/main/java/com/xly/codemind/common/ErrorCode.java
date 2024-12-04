@@ -20,6 +20,8 @@ public enum ErrorCode {
 
     USER_BAN_ERROR(40105,"用户被禁",""),
 
+    QUESTION_BAN_ERROR(40106,"题目被禁用",""),
+
     SYSTEM_ERROR(50000,"系统内部异常",""),
 
     NULL_ERROR(40002,"查询结果为空","");;

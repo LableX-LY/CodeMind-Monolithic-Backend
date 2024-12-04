@@ -10,8 +10,7 @@ import com.xly.codemind.model.request.UserRegisterRequest;
 import com.xly.codemind.model.vo.LoginUserVO;
 import com.xly.codemind.service.UserService;
 import com.xly.codemind.utils.ActionResultUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +35,7 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
+    @ApiImplicitParam(name = "userRegisterRequest",required = true,value = "用户注册请求类:userAccount、userPassword、checkedPassword")
     @ApiOperation(value = "用户注册",notes = "注册")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
         if (userRegisterRequest == null) {
@@ -53,6 +53,12 @@ public class UserController {
     }
 
     @PostMapping("/login")
+    @ApiImplicitParams({
+            //@ApiImplicitParam(name = "userLoginRequest",required = true,value = "用户登录请求类包含两个属性"),
+//            @ApiImplicitParam(name = "userAccount",required = true,value = "账号"),
+//            @ApiImplicitParam(name = "userPassword",required = true,value = "密码"),
+            @ApiImplicitParam(name = "request",required = true,value = "HttpServletRequest请求")
+    })
     @ApiOperation(value = "用户登录",notes = "登录")
     public BaseResponse<LoginUserVO> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
         if (userLoginRequest == null) {
@@ -76,5 +82,7 @@ public class UserController {
         Boolean result = userService.userLogout(request);
         return ActionResultUtil.success(result);
     }
+
+    // todo 管理员视角下要能看到所有的用户，包括被封号的
 
 }

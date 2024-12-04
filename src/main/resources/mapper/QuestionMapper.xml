@@ -12,9 +12,11 @@
             <result property="judgeCase" column="judgeCase" jdbcType="VARCHAR"/>
             <result property="judgeConfig" column="judgeConfig" jdbcType="VARCHAR"/>
             <result property="questionAnswer" column="questionAnswer" jdbcType="VARCHAR"/>
+            <result property="questionDifficulty" column="questionDifficulty" jdbcType="INTEGER"/>
             <result property="submitNum" column="submitNum" jdbcType="INTEGER"/>
             <result property="acceptedNum" column="acceptedNum" jdbcType="INTEGER"/>
             <result property="createUser" column="createUser" jdbcType="BIGINT"/>
+            <result property="editUser" column="editUser" jdbcType="BIGINT"/>
             <result property="questionStatus" column="questionStatus" jdbcType="INTEGER"/>
             <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
             <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
@@ -24,8 +26,8 @@
     <sql id="Base_Column_List">
         id,questionTitle,questionContent,
         questionTags,judgeCase,judgeConfig,
-        questionAnswer,submitNum,acceptedNum,
-        createUser,questionStatus,createTime,
+        questionAnswer,questionDifficulty,submitNum,acceptedNum,
+        createUser,editUser,questionStatus,createTime,
         updateTime,isDelete
     </sql>
 </mapper>

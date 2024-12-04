@@ -53,6 +53,11 @@ public class Question implements Serializable {
     private String questionAnswer;
 
     /**
+     * 题目难度，1-简单,2-一般,3-中等,4-难,5-困难，默认为2
+     */
+    private Integer questionDifficulty;
+
+    /**
      * 题目提交数
      */
     private Integer submitNum;
@@ -66,6 +71,11 @@ public class Question implements Serializable {
      * 题目创建人
      */
     private Long createUser;
+
+    /**
+     * 题目修改人
+     */
+    private Long editUser;
 
     /**
      * 题目状态,0-正常,1-禁用

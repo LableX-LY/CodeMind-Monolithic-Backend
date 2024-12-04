@@ -33,21 +33,23 @@ CREATE INDEX idx_unionId ON user (id);
 -- 题目表（软删除）
 CREATE TABLE IF NOT EXISTS question
 (
-    id 								BIGINT 																					PRIMARY KEY COMMENT 'id',
-    questionTitle 		VARCHAR(512) 																		NOT NULL COMMENT '题目标题',
-    questionContent 	TEXT 																						NOT NULL COMMENT '题目内容',
-    questionTags 			VARCHAR(1024) 																	NOT NULL COMMENT '题目标签列表(JSON数组)',
-    judgeCase 				TEXT 																						NOT NULL COMMENT '判题用例(JSON数组)',
-    judgeConfig 			TEXT 																						NOT NULL COMMENT '判题配置(JSON对象)',
-    questionAnswer 		TEXT 																						NOT NULL COMMENT '题目答案',
-    submitNum 				INT 						DEFAULT 0 											NOT NULL COMMENT '题目提交数',
-    acceptedNum 			INT 						DEFAULT 0 											NOT NULL COMMENT '题目通过数',
-    createUser		 		BIGINT 																					NOT NULL COMMENT '题目创建人',
-    questionStatus 		INT 						DEFAULT 0 											NOT NULL COMMENT '题目状态,0-正常,1-禁用',
-    createTime 				DATETIME 				DEFAULT CURRENT_TIMESTAMP 			NOT NULL COMMENT '创建时间',
-    updateTime 				DATETIME 				DEFAULT CURRENT_TIMESTAMP 			NOT NULL COMMENT '更新时间',
-    isDelete 					TINYINT 				DEFAULT 0 											NOT NULL COMMENT '是否删除,0-正常,1-删除'
-    ) COMMENT '题目表' COLLATE = utf8mb4_unicode_ci;
+    id 									BIGINT 																					PRIMARY KEY COMMENT 'id',
+    questionTitle 			VARCHAR(512) 																		NOT NULL COMMENT '题目标题',
+    questionContent 		TEXT 																						NOT NULL COMMENT '题目内容',
+    questionTags 				VARCHAR(1024) 																	NOT NULL COMMENT '题目标签列表(JSON数组)',
+    judgeCase 					TEXT 																						NOT NULL COMMENT '判题用例(JSON数组)',
+    judgeConfig 				TEXT 																						NOT NULL COMMENT '判题配置(JSON对象)',
+    questionAnswer 			TEXT 																						NOT NULL COMMENT '题目答案',
+    questionDifficulty 	INT 						DEFAULT 2												NULL     COMMENT '题目难度,1-简单,2-一般,3-中等,4-难,5-困难',
+    submitNum 					INT 						DEFAULT 0 											NOT NULL COMMENT '题目提交数',
+    acceptedNum 				INT 						DEFAULT 0 											NOT NULL COMMENT '题目通过数',
+    createUser		 			BIGINT 																					NOT NULL COMMENT '题目创建人',
+    editUser						BIGINT																					NULL     COMMENT '题目修改人',
+    questionStatus 			INT 						DEFAULT 0 											NOT NULL COMMENT '题目状态,0-正常,1-禁用',
+    createTime 					DATETIME 				DEFAULT CURRENT_TIMESTAMP 			NOT NULL COMMENT '创建时间',
+    updateTime 					DATETIME 				DEFAULT CURRENT_TIMESTAMP 			NOT NULL COMMENT '更新时间',
+    isDelete 						TINYINT 				DEFAULT 0 											NOT NULL COMMENT '是否删除,0-正常,1-删除'
+) COMMENT '题目表' COLLATE = utf8mb4_unicode_ci;
 CREATE INDEX idx_unionId ON question (id);
 CREATE INDEX idx_userId ON question (createUser);
 
