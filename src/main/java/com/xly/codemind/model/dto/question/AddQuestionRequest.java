@@ -1,21 +1,18 @@
-package com.xly.codemind.model.request;
+package com.xly.codemind.model.dto.question;
 
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @author X-LY。
  * @version 1.0
- * @datetime 2024/12/4 19:50
- * @description 修改题目请求类
+ * @datetime 2024/12/4 19:49
+ * @description 新增题目请求类
  **/
 
 @Data
-public class EditQuestionRequest {
-
-    /**
-     * 题目id
-     */
-    private Long questionId;
+public class AddQuestionRequest {
 
     /**
      * 题目标题
@@ -30,17 +27,17 @@ public class EditQuestionRequest {
     /**
      * 题目标签列表(JSON数组)
      */
-    private String questionTags;
+    private List<String> questionTags;
 
     /**
      * 判题用例(JSON数组)
      */
-    private String judgeCase;
+    private List<JudgeCase> judgeCase;
 
     /**
      * 判题配置(JSON对象)
      */
-    private String judgeConfig;
+    private JudgeConfig judgeConfig;
 
     /**
      * 题目答案
@@ -53,4 +50,3 @@ public class EditQuestionRequest {
     private Integer questionDifficulty;
 
 }
-

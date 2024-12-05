@@ -1,5 +1,7 @@
 package com.xly.codemind.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xly.codemind.common.ErrorCode;
 import com.xly.codemind.common.IdWorker;
@@ -7,12 +9,16 @@ import com.xly.codemind.exception.BusinessException;
 import com.xly.codemind.mapper.QuestionMapper;
 import com.xly.codemind.model.bean.Question;
 import com.xly.codemind.model.bean.User;
+import com.xly.codemind.model.dto.question.JudgeConfig;
+import com.xly.codemind.model.dto.question.UserQueryQuestionRequest;
 import com.xly.codemind.service.QuestionService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+
+import java.util.List;
 
 import static com.xly.codemind.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -30,9 +36,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
     private QuestionMapper questionMapper;
 
     @Override
-    public Long addQuestion(String questionTitle, String questionContent, String questionAnswer, String questionTags, String judgeCase, String judgeConfig, int questionDifficulty, HttpServletRequest request) {
+    public Long addQuestion(String questionTitle, String questionContent, String questionAnswer, String questionTagsJsonString, String judgeCaseObjectJsonString, String judgeConfigObjectJsonString, int questionDifficulty, HttpServletRequest request) {
         //校验信息
-        if (StringUtils.isAnyBlank(questionTitle,questionContent,questionAnswer,questionTags,judgeCase,judgeConfig)) {
+        if (StringUtils.isAnyBlank(questionTitle,questionContent,questionTagsJsonString,judgeCaseObjectJsonString,judgeConfigObjectJsonString,questionAnswer)) {
             throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"题目信息设置有误!");
         }
         if (questionDifficulty < 0) {
@@ -41,15 +47,15 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         Question question = new Question();
         long id = IdWorker.getInstance().nextId();
         if (id == 0) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"系统发生内部错误,id生成失败!");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"IdWorker发生错误,id生成失败!");
         }
         // todo 只有管理员才可以添加题目
         question.setQuestionTitle(questionTitle);
         question.setQuestionContent(questionContent);
         question.setQuestionAnswer(questionAnswer);
-        question.setQuestionTags(questionTags);
-        question.setJudgeCase(judgeCase);
-        question.setJudgeConfig(judgeConfig);
+        question.setQuestionTags(questionTagsJsonString);
+        question.setJudgeCase(judgeCaseObjectJsonString);
+        question.setJudgeConfig(judgeConfigObjectJsonString);
         question.setQuestionDifficulty(questionDifficulty);
         // todo 获取登录用户方法优化？
         Object sessionUser = request.getSession().getAttribute(USER_LOGIN_STATE);
@@ -88,9 +94,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
     }
 
     @Override
-    public Boolean editQuestion(long questionId,String questionTitle, String questionContent, String questionAnswer, String questionTags, String judgeCase, String judgeConfig, int questionDifficulty, HttpServletRequest request) {
+    public Boolean editQuestion(long questionId,String questionTitle, String questionContent, String questionAnswer, String questionTagsJsonString, String judgeCaseObjectString, String judgeConfigObjectString, int questionDifficulty, HttpServletRequest request) {
         //校验信息
-        if (StringUtils.isAnyBlank(questionTitle,questionContent,questionAnswer,questionTags,judgeCase,judgeConfig)) {
+        if (StringUtils.isAnyBlank(questionTitle,questionContent,questionAnswer,questionTagsJsonString,judgeCaseObjectString,judgeConfigObjectString)) {
             throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"题目信息设置有误!");
         }
         if (questionDifficulty < 0) {
@@ -121,13 +127,13 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         if (!StringUtils.equals(oldQuestionAnswer,questionAnswer)) {
             isChanged = true;
         }
-        if (!StringUtils.equals(oldQuestionTags, questionTags)) {
+        if (!StringUtils.equals(oldQuestionTags, questionTagsJsonString)) {
             isChanged = true;
         }
-        if (!StringUtils.equals(oldJudgeCase,judgeCase)) {
+        if (!StringUtils.equals(oldJudgeCase,judgeCaseObjectString)) {
             isChanged = true;
         }
-        if (!StringUtils.equals(oldJudgeConfig,judgeConfig)) {
+        if (!StringUtils.equals(oldJudgeConfig,judgeConfigObjectString)) {
             isChanged = true;
         }
         if (oldQuestionDifficulty != questionDifficulty) {
@@ -145,9 +151,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         question.setQuestionTitle(questionTitle);
         question.setQuestionContent(questionContent);
         question.setQuestionAnswer(questionAnswer);
-        question.setQuestionTags(questionTags);
-        question.setJudgeCase(judgeCase);
-        question.setJudgeConfig(judgeConfig);
+        question.setQuestionTags(questionTagsJsonString);
+        question.setJudgeCase(judgeCaseObjectString);
+        question.setJudgeConfig(judgeConfigObjectString);
         question.setEditUser(loginUser.getId());
         int editedNum = questionMapper.updateById(question);
         if (editedNum < 0) {
@@ -155,6 +161,42 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         }
         return true;
     }
+
+    /**
+     * 获取查询包装类（用户根据哪些字段查询，根据前端传来的请求对象，得到 mybatis 框架支持的查询 QueryWrapper 类）
+     * @param userQueryQuestionRequest 用户题目查询请求
+     * @return 用户视角下的题目查询包装类
+     */
+    @Override
+    public QueryWrapper<Question> getQueryWrapper(UserQueryQuestionRequest userQueryQuestionRequest) {
+        QueryWrapper<Question> questionQueryWrapper = new QueryWrapper<>();
+        if (userQueryQuestionRequest == null) {
+            return questionQueryWrapper;
+        }
+        //获取查询条件
+        String questionTitle = userQueryQuestionRequest.getQuestionTitle();
+        String questionContent = userQueryQuestionRequest.getQuestionContent();
+        List<String> questionTags = userQueryQuestionRequest.getQuestionTags();
+        List<JudgeConfig> judgeConfig = userQueryQuestionRequest.getJudgeConfig();
+        int questionDifficulty = userQueryQuestionRequest.getQuestionDifficulty();
+        int submitNum = userQueryQuestionRequest.getSubmitNum();
+        int acceptedNum = userQueryQuestionRequest.getAcceptedNum();
+
+        //拼接查询条件
+//        questionQueryWrapper.like(StringUtils.isNotBlank(questionTitle),"questionTitle",questionTitle);
+//        questionQueryWrapper.like(StringUtils.isNotBlank(questionContent),"questionContent",questionContent);
+//        if (CollectionUtils.isNotEmpty(questionTags)) {
+//            for (String tag : questionTags) {
+//                questionQueryWrapper.like("tags", "\"" + tag + "\"");
+//            }
+//        }
+//        questionQueryWrapper.like(StringUtils.isNotBlank(judgeConfig),"questionTitle",judgeConfig);
+//        questionQueryWrapper.like(StringUtils.isNotBlank(questionDifficulty),"questionTitle",questionDifficulty);
+//        questionQueryWrapper.like("questionTitle",submitNum);
+//        questionQueryWrapper.like("questionTitle",questionTitle);
+        return null;
+    }
+
 }
 
 

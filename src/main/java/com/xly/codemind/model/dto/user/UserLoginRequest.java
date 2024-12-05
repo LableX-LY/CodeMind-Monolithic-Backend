@@ -1,4 +1,4 @@
-package com.xly.codemind.model.request;
+package com.xly.codemind.model.dto.user;
 
 /**
  * @author X-LY。

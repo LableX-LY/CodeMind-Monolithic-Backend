@@ -1,12 +1,10 @@
 package com.xly.codemind.controller;
 
-import cn.hutool.http.server.HttpServerRequest;
 import com.xly.codemind.common.BaseResponse;
 import com.xly.codemind.common.ErrorCode;
 import com.xly.codemind.exception.BusinessException;
-import com.xly.codemind.model.bean.User;
-import com.xly.codemind.model.request.UserLoginRequest;
-import com.xly.codemind.model.request.UserRegisterRequest;
+import com.xly.codemind.model.dto.user.UserLoginRequest;
+import com.xly.codemind.model.dto.user.UserRegisterRequest;
 import com.xly.codemind.model.vo.LoginUserVO;
 import com.xly.codemind.service.UserService;
 import com.xly.codemind.utils.ActionResultUtil;
@@ -17,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 /**
  * @author X-LY。
