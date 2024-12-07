@@ -1,9 +1,13 @@
 package com.xly.codemind.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xly.codemind.model.bean.Question;
+import com.xly.codemind.model.dto.question.AdminQueryQuestionRequest;
 import com.xly.codemind.model.dto.question.UserQueryQuestionRequest;
+import com.xly.codemind.model.vo.AdminQuestionVO;
+import com.xly.codemind.model.vo.UserQuestionVO;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -54,6 +58,27 @@ public interface QuestionService extends IService<Question> {
      * @param userQueryQuestionRequest 用户题目查询请求
      * @return 用户视角下的题目查询包装类
      */
-    QueryWrapper<Question> getQueryWrapper(UserQueryQuestionRequest userQueryQuestionRequest);
+    QueryWrapper<Question> getUserQueryWrapper(UserQueryQuestionRequest userQueryQuestionRequest);
+
+    /**
+     * 根据用户题目查询包装类分页获取题目
+     * @param userQuestionPageQueryWrapper 用户题目查询包装类
+     * @return 题目（分页）
+     */
+    Page<UserQuestionVO> getUserQuestionVOByPage(Page<Question> userQuestionPageQueryWrapper);
+
+    /**
+     * 获取管理员题目查询包装类
+     * @param adminQueryQuestionRequest 管理员题目查询请求
+     * @return 管理员视角下的题目查询包装类
+     */
+    QueryWrapper<Question> getAdminQueryWrapper(AdminQueryQuestionRequest adminQueryQuestionRequest);
+
+    /**
+     * 根据管理员题目查询包装类分页获取题目
+     * @param adminQuestionPageQueryWrapper 管理员题目查询包装类
+     * @return 题目（分页）
+     */
+    Page<AdminQuestionVO> getAdminQuestionVOByPage(Page<Question> adminQuestionPageQueryWrapper);
 
 }

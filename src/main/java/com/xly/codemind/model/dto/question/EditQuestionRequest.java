@@ -2,6 +2,7 @@ package com.xly.codemind.model.dto.question;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -12,7 +13,7 @@ import java.util.List;
  **/
 
 @Data
-public class EditQuestionRequest {
+public class EditQuestionRequest implements Serializable {
 
     /**
      * 题目id
@@ -53,6 +54,8 @@ public class EditQuestionRequest {
      * 题目难度,1-简单,2-一般,3-中等,4-难,5-困难，默认为2
      */
     private Integer questionDifficulty;
+
+    private static final long serialVersionUID = 1L;
 
 }
 

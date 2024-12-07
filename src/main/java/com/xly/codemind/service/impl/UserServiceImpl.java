@@ -9,8 +9,10 @@ import com.xly.codemind.exception.BusinessException;
 import com.xly.codemind.mapper.UserMapper;
 import com.xly.codemind.model.bean.User;
 import com.xly.codemind.model.vo.LoginUserVO;
+import com.xly.codemind.model.vo.UserVO;
 import com.xly.codemind.service.UserService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -157,6 +159,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         //清空Session
         request.getSession().removeAttribute(UserConstant.USER_LOGIN_STATE);
         return true;
+    }
+
+    @Override
+    public UserVO getUserVO(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        return userVO;
     }
 
     /**

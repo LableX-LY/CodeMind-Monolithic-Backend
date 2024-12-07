@@ -2,21 +2,19 @@ package com.xly.codemind.model.dto.question;
 
 import com.xly.codemind.common.PageRequest;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
  * @author X-LY。
  * @version 1.0
- * @createtime 2024/12/5 22:46
- * @description 用户题目查询请求类
+ * @createtime 2024/12/7 14:18
+ * @description 管理员题目查询请求类
  **/
-
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class UserQueryQuestionRequest extends PageRequest implements Serializable {
+public class AdminQueryQuestionRequest extends PageRequest implements Serializable {
 
     /**
      * id
@@ -57,6 +55,31 @@ public class UserQueryQuestionRequest extends PageRequest implements Serializabl
      * 题目通过数
      */
     private Integer acceptedNum;
+
+    /**
+     * 题目创建人
+     */
+    private Long createUser;
+
+    /**
+     * 题目修改人
+     */
+    private Long editUser;
+
+    /**
+     * 题目状态,0-正常,1-禁用
+     */
+    private Integer questionStatus;
+
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+
+    /**
+     * 更新时间
+     */
+    private Date updateTime;
 
     private static final long serialVersionUID = 1L;
 

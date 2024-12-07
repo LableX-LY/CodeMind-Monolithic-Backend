@@ -2,23 +2,34 @@ package com.xly.codemind.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.gson.Gson;
 import com.xly.codemind.common.ErrorCode;
 import com.xly.codemind.common.IdWorker;
 import com.xly.codemind.exception.BusinessException;
 import com.xly.codemind.mapper.QuestionMapper;
 import com.xly.codemind.model.bean.Question;
 import com.xly.codemind.model.bean.User;
+import com.xly.codemind.model.dto.question.AdminQueryQuestionRequest;
 import com.xly.codemind.model.dto.question.JudgeConfig;
 import com.xly.codemind.model.dto.question.UserQueryQuestionRequest;
+import com.xly.codemind.model.vo.AdminQuestionVO;
+import com.xly.codemind.model.vo.UserQuestionVO;
 import com.xly.codemind.service.QuestionService;
+import com.xly.codemind.service.UserService;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.xly.codemind.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -34,6 +45,11 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
 
     @Resource
     private QuestionMapper questionMapper;
+
+    @Resource
+    private UserService userService;
+
+    private final static Gson GSON = new Gson();
 
     @Override
     public Long addQuestion(String questionTitle, String questionContent, String questionAnswer, String questionTagsJsonString, String judgeCaseObjectJsonString, String judgeConfigObjectJsonString, int questionDifficulty, HttpServletRequest request) {
@@ -168,33 +184,146 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
      * @return 用户视角下的题目查询包装类
      */
     @Override
-    public QueryWrapper<Question> getQueryWrapper(UserQueryQuestionRequest userQueryQuestionRequest) {
-        QueryWrapper<Question> questionQueryWrapper = new QueryWrapper<>();
+    public QueryWrapper<Question> getUserQueryWrapper(UserQueryQuestionRequest userQueryQuestionRequest) {
+        QueryWrapper<Question> userQuestionQueryWrapper = new QueryWrapper<>();
         if (userQueryQuestionRequest == null) {
-            return questionQueryWrapper;
+            return userQuestionQueryWrapper;
         }
         //获取查询条件
+//        long questionId = userQueryQuestionRequest.getId();
         String questionTitle = userQueryQuestionRequest.getQuestionTitle();
         String questionContent = userQueryQuestionRequest.getQuestionContent();
         List<String> questionTags = userQueryQuestionRequest.getQuestionTags();
-        List<JudgeConfig> judgeConfig = userQueryQuestionRequest.getJudgeConfig();
-        int questionDifficulty = userQueryQuestionRequest.getQuestionDifficulty();
-        int submitNum = userQueryQuestionRequest.getSubmitNum();
-        int acceptedNum = userQueryQuestionRequest.getAcceptedNum();
+        String questionTagsJson = GSON.toJson(questionTags);
+        JudgeConfig judgeConfig = userQueryQuestionRequest.getJudgeConfig();
+        String judgeConfigJson = GSON.toJson(judgeConfig);
+        Integer questionDifficulty = userQueryQuestionRequest.getQuestionDifficulty();
+        Integer submitNum = userQueryQuestionRequest.getSubmitNum();
+        Integer acceptedNum = userQueryQuestionRequest.getAcceptedNum();
+        String sortField = userQueryQuestionRequest.getSortField();
+        String sortOrder = userQueryQuestionRequest.getSortOrder();
 
         //拼接查询条件
-//        questionQueryWrapper.like(StringUtils.isNotBlank(questionTitle),"questionTitle",questionTitle);
-//        questionQueryWrapper.like(StringUtils.isNotBlank(questionContent),"questionContent",questionContent);
-//        if (CollectionUtils.isNotEmpty(questionTags)) {
-//            for (String tag : questionTags) {
-//                questionQueryWrapper.like("tags", "\"" + tag + "\"");
+//        questionQueryWrapper.like(questionId > 0,"id",questionId);
+        userQuestionQueryWrapper.like(StringUtils.isNotBlank(questionTitle),"questionTitle",questionTitle);
+        userQuestionQueryWrapper.like(StringUtils.isNotBlank(questionContent),"questionContent",questionContent);
+        if (CollectionUtils.isNotEmpty(questionTags)) {
+            for (String tag : questionTags) {
+                userQuestionQueryWrapper.like("questionTags", "\"" + tag + "\"");
+            }
+        }
+
+        userQuestionQueryWrapper.like(ObjectUtils.isNotEmpty(judgeConfig),"judgeConfig",judgeConfigJson);
+        userQuestionQueryWrapper.like(ObjectUtils.isNotEmpty(questionDifficulty),"questionDifficulty",questionDifficulty);
+        userQuestionQueryWrapper.like(ObjectUtils.isNotEmpty(submitNum),"submitNum",submitNum);
+        userQuestionQueryWrapper.like(ObjectUtils.isNotEmpty(acceptedNum),"acceptedNum",acceptedNum);
+        return userQuestionQueryWrapper;
+    }
+
+    @Override
+    public Page<UserQuestionVO> getUserQuestionVOByPage(Page<Question> userQuestionPageQueryWrapper) {
+        List<Question> questionList = userQuestionPageQueryWrapper.getRecords();
+        Page<UserQuestionVO> userQuestionVOPage = new Page<>(userQuestionPageQueryWrapper.getCurrent(), userQuestionPageQueryWrapper.getSize(), userQuestionPageQueryWrapper.getTotal());
+        if (CollectionUtils.isEmpty(questionList)) {
+            return userQuestionVOPage;
+        }
+//        // 1. 关联查询用户信息
+//        Set<Long> userIdSet = questionList.stream().map(Question::getUserId).collect(Collectors.toSet());
+//        Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream()
+//                .collect(Collectors.groupingBy(User::getId));
+        // 填充信息
+        List<UserQuestionVO> questionVOList = questionList.stream().map(question -> {
+            UserQuestionVO questionVO = UserQuestionVO.objToVo(question);
+//            Long userId = question.getUserId();
+//            User user = null;
+//            if (userIdUserListMap.containsKey(userId)) {
+//                user = userIdUserListMap.get(userId).get(0);
 //            }
-//        }
-//        questionQueryWrapper.like(StringUtils.isNotBlank(judgeConfig),"questionTitle",judgeConfig);
-//        questionQueryWrapper.like(StringUtils.isNotBlank(questionDifficulty),"questionTitle",questionDifficulty);
-//        questionQueryWrapper.like("questionTitle",submitNum);
-//        questionQueryWrapper.like("questionTitle",questionTitle);
-        return null;
+//            questionVO.setUserVO(userService.getUserVO(user));
+            return questionVO;
+        }).collect(Collectors.toList());
+        userQuestionVOPage.setRecords(questionVOList);
+        return userQuestionVOPage;
+    }
+
+    /**
+     * 获取查询包装类（管理员根据哪些字段查询，根据前端传来的请求对象，得到 mybatis 框架支持的查询 QueryWrapper 类）
+     * @param adminQueryQuestionRequest 管理员题目查询请求
+     * @return 管理员视角下的题目查询包装类
+     */
+    @Override
+    public QueryWrapper<Question> getAdminQueryWrapper(AdminQueryQuestionRequest adminQueryQuestionRequest) {
+        QueryWrapper<Question> adminQuestionQueryWrapper = new QueryWrapper<>();
+        if (adminQueryQuestionRequest == null) {
+            return adminQuestionQueryWrapper;
+        }
+        //获取查询条件
+        Long questionId = adminQueryQuestionRequest.getId();
+        String questionTitle = adminQueryQuestionRequest.getQuestionTitle();
+        String questionContent = adminQueryQuestionRequest.getQuestionContent();
+        List<String> questionTags = adminQueryQuestionRequest.getQuestionTags();
+        JudgeConfig judgeConfig = adminQueryQuestionRequest.getJudgeConfig();
+        String judgeConfigJson = GSON.toJson(judgeConfig);
+        //使用包装类，因为包装类允许为空（前端不传递这个字段，即不通过这个条件查询）
+        Integer questionDifficulty = adminQueryQuestionRequest.getQuestionDifficulty();
+        Integer submitNum = adminQueryQuestionRequest.getSubmitNum();
+        Integer acceptedNum = adminQueryQuestionRequest.getAcceptedNum();
+        Long createUser = adminQueryQuestionRequest.getCreateUser();
+        Long editUser = adminQueryQuestionRequest.getEditUser();
+        Integer questionStatus = adminQueryQuestionRequest.getQuestionStatus();
+        Date createTime = adminQueryQuestionRequest.getCreateTime();
+        Date updateTime = adminQueryQuestionRequest.getUpdateTime();
+        String sortField = adminQueryQuestionRequest.getSortField();
+        String sortOrder = adminQueryQuestionRequest.getSortOrder();
+
+        //拼接查询条件
+        adminQuestionQueryWrapper.like(ObjectUtils.isNotEmpty(questionId),"id",questionId);
+        adminQuestionQueryWrapper.like(StringUtils.isNotBlank(questionTitle),"questionTitle",questionTitle);
+        adminQuestionQueryWrapper.like(StringUtils.isNotBlank(questionContent),"questionContent",questionContent);
+        if (CollectionUtils.isNotEmpty(questionTags)) {
+            for (String tag : questionTags) {
+                adminQuestionQueryWrapper.like("questionTags", "\"" + tag + "\"");
+            }
+        }
+        adminQuestionQueryWrapper.like(judgeConfig != null,"judgeConfig",judgeConfigJson);
+        adminQuestionQueryWrapper.like(ObjectUtils.isNotEmpty(questionDifficulty),"questionDifficulty",questionDifficulty);
+        adminQuestionQueryWrapper.like(ObjectUtils.isNotEmpty(submitNum),"submitNum",submitNum);
+        adminQuestionQueryWrapper.like(ObjectUtils.isNotEmpty(acceptedNum),"acceptedNum",acceptedNum);
+        adminQuestionQueryWrapper.like(ObjectUtils.isNotEmpty(createUser),"createUser",createUser);
+        adminQuestionQueryWrapper.like(ObjectUtils.isNotEmpty(editUser),"editUser",editUser);
+        adminQuestionQueryWrapper.like(ObjectUtils.isNotEmpty(questionStatus),"questionStatus",questionStatus);
+        adminQuestionQueryWrapper.like(ObjectUtils.isNotEmpty(createTime),"createTime",createTime);
+        adminQuestionQueryWrapper.like(ObjectUtils.isNotEmpty(updateTime),"updateTime",updateTime);
+        return adminQuestionQueryWrapper;
+    }
+
+    @Override
+    public Page<AdminQuestionVO> getAdminQuestionVOByPage(Page<Question> adminQuestionPageQueryWrapper) {
+        List<Question> questionList = adminQuestionPageQueryWrapper.getRecords();
+        Page<AdminQuestionVO> adminQuestionVOPage = new Page<>(adminQuestionPageQueryWrapper.getCurrent(), adminQuestionPageQueryWrapper.getSize(), adminQuestionPageQueryWrapper.getTotal());
+        if (CollectionUtils.isEmpty(questionList)) {
+            return adminQuestionVOPage;
+        }
+        // 1. 关联查询创建者和修改者信息
+        Set<Long> createUserSet = questionList.stream().map(Question::getCreateUser).collect(Collectors.toSet());
+        Map<Long, List<User>> createUserListMap = userService.listByIds(createUserSet).stream()
+                .collect(Collectors.groupingBy(User::getId));
+        Set<Long> editUserSet = questionList.stream().map(Question::getCreateUser).collect(Collectors.toSet());
+        Map<Long, List<User>> editUserListMap = userService.listByIds(editUserSet).stream()
+                .collect(Collectors.groupingBy(User::getId));
+        // 填充信息
+        List<AdminQuestionVO> questionVOList = questionList.stream().map(question -> {
+            AdminQuestionVO adminQuestionVO = AdminQuestionVO.objToVo(question);
+            Long createUser = question.getCreateUser();
+            User user = null;
+            if (createUserListMap.containsKey(createUser)) {
+                user = createUserListMap.get(createUser).get(0);
+            }
+            adminQuestionVO.setCreateUser(userService.getUserVO(user).getId());
+            return adminQuestionVO;
+        }).collect(Collectors.toList());
+        adminQuestionVOPage.setRecords(questionVOList);
+        return adminQuestionVOPage;
     }
 
 }

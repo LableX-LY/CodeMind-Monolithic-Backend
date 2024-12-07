@@ -57,4 +57,6 @@ public class LoginUserVO {
      */
     private String userProfile;
 
+    private static final long serialVersionUID = 1L;
+
 }

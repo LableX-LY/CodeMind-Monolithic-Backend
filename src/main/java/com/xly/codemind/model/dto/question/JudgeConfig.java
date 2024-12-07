@@ -2,6 +2,8 @@ package com.xly.codemind.model.dto.question;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * @author X-LY。
  * @version 1.0
@@ -10,7 +12,7 @@ import lombok.Data;
  **/
 
 @Data
-public class JudgeConfig {
+public class JudgeConfig implements Serializable {
 
     /**
      * 时间限制（ms）
@@ -26,4 +28,7 @@ public class JudgeConfig {
      * 堆栈限制（KB）
      */
     private Long stackLimit;
+
+    private static final long serialVersionUID = 1L;
+
 }

@@ -3,6 +3,7 @@ package com.xly.codemind.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xly.codemind.model.bean.User;
 import com.xly.codemind.model.vo.LoginUserVO;
+import com.xly.codemind.model.vo.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -39,5 +40,13 @@ public interface UserService extends IService<User> {
      * @return 是否成功退出登录
      */
     Boolean userLogout(HttpServletRequest request);
+
+    /**
+     * 获取脱敏的用户信息
+     * @param user 用户
+     * @return 脱敏用户信息
+     */
+    UserVO getUserVO(User user);
+
 
 }

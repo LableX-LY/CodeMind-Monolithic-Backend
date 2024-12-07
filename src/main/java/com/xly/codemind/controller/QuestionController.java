@@ -7,7 +7,8 @@ import com.xly.codemind.common.ErrorCode;
 import com.xly.codemind.exception.BusinessException;
 import com.xly.codemind.model.bean.Question;
 import com.xly.codemind.model.dto.question.*;
-import com.xly.codemind.model.vo.QuestionVO;
+import com.xly.codemind.model.vo.AdminQuestionVO;
+import com.xly.codemind.model.vo.UserQuestionVO;
 import com.xly.codemind.service.QuestionService;
 import com.xly.codemind.utils.ActionResultUtil;
 import io.swagger.annotations.ApiImplicitParam;
@@ -40,7 +41,7 @@ public class QuestionController {
 
     @PostMapping("/add")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "addQuestionRequest",required = true,value = "题目添加请求类:questionTitle、questionContent、questionAnswer、questionTags、judgeCase、judgeConfig、questionDifficulty"),
+            //@ApiImplicitParam(name = "addQuestionRequest",required = true,value = "题目添加请求类:questionTitle、questionContent、questionAnswer、questionTags、judgeCase、judgeConfig、questionDifficulty"),
             @ApiImplicitParam(name = "request",required = true,value = "HttpServletRequest请求")
     })
     @ApiOperation(value = "添加题目接口",notes = "添加题目接口")
@@ -123,18 +124,34 @@ public class QuestionController {
         return ActionResultUtil.success(result);
     }
 
-    // todo 管理员视角下要能看到所有的题目，包括被禁用的
-    @GetMapping("/list/page/user/question")
-    @ApiOperation(value = "用户分页查询题目",notes = "用户分分页查询题目")
-    public BaseResponse<Page<QuestionVO>> getListQuestionVOByPage(@RequestBody UserQueryQuestionRequest userQueryQuestionRequest) {
+    //普通用户分页查询题目
+    @PostMapping("/user/list/page")
+    @ApiOperation(value = "普通用户分页查询题目",notes = "普通用户分页查询题目")
+    public BaseResponse<Page<UserQuestionVO>> getUserQuestionVOByPage(@RequestBody UserQueryQuestionRequest userQueryQuestionRequest) {
         if (userQueryQuestionRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"请求参数错误!");
         }
         long current = userQueryQuestionRequest.getCurrent();
         long size = userQueryQuestionRequest.getPageSize();
         Page<Question> userQuestionPageQueryWrapper = questionService.page(new Page<>(current, size),
-                questionService.getQueryWrapper(userQueryQuestionRequest));
-        return null;
+                questionService.getUserQueryWrapper(userQueryQuestionRequest));
+        Page<UserQuestionVO> questionVOByPage = questionService.getUserQuestionVOByPage(userQuestionPageQueryWrapper);
+        return ActionResultUtil.success(questionVOByPage);
+    }
+
+    //管理员分页查询题目
+    @PostMapping("/admin/list/page")
+    @ApiOperation(value = "管理员分页查询题目",notes = "管理员分页查询题目")
+    public BaseResponse<Page<AdminQuestionVO>> getAdminQuestionByPage(@RequestBody AdminQueryQuestionRequest adminQueryQuestionRequest) {
+        if (adminQueryQuestionRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"请求参数错误!");
+        }
+        long current = adminQueryQuestionRequest.getCurrent();
+        long size = adminQueryQuestionRequest.getPageSize();
+        Page<Question> adminQuestionPageQueryWrapper = questionService.page(new Page<>(current, size),
+                questionService.getAdminQueryWrapper(adminQueryQuestionRequest));
+        Page<AdminQuestionVO> adminQuestionVOByPage = questionService.getAdminQuestionVOByPage(adminQuestionPageQueryWrapper);
+        return ActionResultUtil.success(adminQuestionVOByPage);
     }
 
 }
