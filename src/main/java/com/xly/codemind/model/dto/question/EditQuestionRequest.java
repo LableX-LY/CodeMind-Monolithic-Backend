@@ -1,5 +1,6 @@
 package com.xly.codemind.model.dto.question;
 
+import io.swagger.models.auth.In;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -54,6 +55,11 @@ public class EditQuestionRequest implements Serializable {
      * 题目难度,1-简单,2-一般,3-中等,4-难,5-困难，默认为2
      */
     private Integer questionDifficulty;
+
+    /**
+     * 题目状态
+     */
+    private Integer questionStatus;
 
     private static final long serialVersionUID = 1L;
 

@@ -6,7 +6,6 @@ import com.xly.codemind.model.vo.LoginUserVO;
 import com.xly.codemind.model.vo.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 
 /**
@@ -47,6 +46,13 @@ public interface UserService extends IService<User> {
      * @return 脱敏用户信息
      */
     UserVO getUserVO(User user);
+
+    /**
+     * 获取登录用户的信息
+     * @param request http
+     * @return 当前Session中的用户信息
+     */
+    User getLoginUser(HttpServletRequest request);
 
 
 }

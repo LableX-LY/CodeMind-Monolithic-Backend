@@ -51,7 +51,7 @@ public interface QuestionService extends IService<Question> {
      * @param questionDifficulty 题目难度
      * @return 是否修改成功
      */
-    Boolean editQuestion(long questionId,String questionTitle, String questionContent, String questionAnswer, String questionTagsJsonString, String judgeCaseObjectJsonString, String judgeConfigObjectJsonString, int questionDifficulty, HttpServletRequest request);
+    Boolean editQuestion(long questionId,String questionTitle, String questionContent, String questionAnswer, String questionTagsJsonString, String judgeCaseObjectJsonString, String judgeConfigObjectJsonString, int questionDifficulty, Integer questionStatus, HttpServletRequest request);
 
     /**
      * 获取用户题目查询包装类

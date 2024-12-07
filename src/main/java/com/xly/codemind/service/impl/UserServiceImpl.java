@@ -40,34 +40,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public Long userRegister(String userAccount, String userPassword, String checkedPassword) {
 
-        //校验参数不能为空
+        //参数不能为空
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkedPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR, "请求参数为空");
         }
-        //账号长度大于8小于18，且不包含特殊字符
-        if (userAccount.length() < 8) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号长度小于8位!");
-        }
-        if (userAccount.length() > 18) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号长度超过18位!");
-        }
-        String validPatternUserAccount = "[`~!#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~!#¥%,,,,,,&*（）——+｜{}【】'; ;]";
-        Matcher userAccountMatcher = Pattern.compile(validPatternUserAccount).matcher(userAccount);
-        if(userAccountMatcher.find()){
-            throw  new BusinessException(ErrorCode.PARAMS_ERROR,"账号包含禁止使用的特殊字符!");
-        }
-        //密码长度大于8小于18，且不包含特殊字符
-        if (userPassword.length() < 8) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"密码长度小于8位!");
-        }
-        if (userPassword.length() > 18) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"密码长度超过18位!");
-        }
-        String validPatternUserPassword = "[`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~!@#¥%,,,,,,&*（）——+｜{}【】'; ;]";
-        Matcher userPasswordmatcher = Pattern.compile(validPatternUserPassword).matcher(userPassword);
-        if(userPasswordmatcher.find()){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"密码包含禁止使用的特殊字符!");
-        }
+        //校验账号和密码的合法性
+        verifyUserAccountAndUserPassword(userAccount, userPassword);
         //密码和二次确认密码必须相同
         if (!userPassword.equals(checkedPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"两次输入的密码不一致!");
@@ -108,31 +86,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (StringUtils.isAnyBlank(userAccount,userPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"账号或密码为空，请重新输入!");
         }
-        //账号长度大于8小于18，且不包含特殊字符
-        if (userAccount.length() < 8) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号长度小于8位!");
-        }
-        if (userAccount.length() > 18) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号长度大于18位!");
-        }
-        String validPatternUserAccount = "[`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~!@#¥%,,,,,,&*（）——+｜{}【】'; ;]";
-        Matcher userAccountMatcher = Pattern.compile(validPatternUserAccount).matcher(userAccount);
-        if(userAccountMatcher.find()){
-            throw  new BusinessException(ErrorCode.PARAMS_ERROR,"账号包含禁止使用的特殊字符!");
-        }
-        //密码长度大于8小于18，且不包含特殊字符
-        if (userPassword.length() < 8) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"密码长度小于8位!");
-        }
-        if (userPassword.length() > 18) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"密码长度大于18位!");
-        }
-        // todo 简化账号和密码特殊字符校验逻辑，多次调用
-        String validPatternUserPassword = "[`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~!@#¥%,,,,,,&*（）——+｜{}【】'; ;]";
-        Matcher userPasswordmatcher = Pattern.compile(validPatternUserPassword).matcher(userAccount);
-        if(userPasswordmatcher.find()){
-            throw  new BusinessException(ErrorCode.PARAMS_ERROR,"密码包含禁止使用的特殊字符!");
-        }
+        //校验账号和密码的合法性
+        verifyUserAccountAndUserPassword(userAccount, userPassword);
+        //密码MD5加密
         String encryptedPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
         //账号密码匹配且没有被Ban
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
@@ -171,10 +127,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return userVO;
     }
 
+    @Override
+    public User getLoginUser(HttpServletRequest request) {
+        Object attribute = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
+        if (attribute == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"用户未登录!");
+        }
+        User loginUser = (User) attribute;
+        return loginUser;
+    }
+
     /**
      * 内部方法，将user转换为脱敏用户loginUser
-     * @param user
-     * @return
+     * @param user 完整的用户
+     * @return 脱敏用户
      */
     private LoginUserVO userToLoginUser(User user) {
         LoginUserVO loginUser = new LoginUserVO();
@@ -188,6 +154,38 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         loginUser.setUserGender(user.getUserGender());
         loginUser.setUserEmail(user.getUserEmail());
         return loginUser;
+    }
+
+    /**
+     * 内部方法，校验账号的密码的合法性
+     * @param userAccount 账号
+     * @param userPassword 密码
+     */
+    private void verifyUserAccountAndUserPassword(String userAccount, String userPassword) {
+        //账号长度大于8小于18，且不包含特殊字符
+        if (userAccount.length() < 8) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号长度小于8位!");
+        }
+        if (userAccount.length() > 18) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号长度超过18位!");
+        }
+        String validPatternUserAccount = "[`~!#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~!#¥%,,,,,,&*（）——+｜{}【】'; ;]";
+        Matcher userAccountMatcher = Pattern.compile(validPatternUserAccount).matcher(userAccount);
+        if(userAccountMatcher.find()){
+            throw  new BusinessException(ErrorCode.PARAMS_ERROR,"账号包含禁止使用的特殊字符!");
+        }
+        //密码长度大于8小于18，且不包含特殊字符
+        if (userPassword.length() < 8) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"密码长度小于8位!");
+        }
+        if (userPassword.length() > 18) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"密码长度超过18位!");
+        }
+        String validPatternUserPassword = "[`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~!@#¥%,,,,,,&*（）——+｜{}【】'; ;]";
+        Matcher userPasswordmatcher = Pattern.compile(validPatternUserPassword).matcher(userPassword);
+        if(userPasswordmatcher.find()){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"密码包含禁止使用的特殊字符!");
+        }
     }
 
 }

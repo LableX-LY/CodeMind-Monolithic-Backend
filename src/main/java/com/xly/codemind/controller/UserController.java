@@ -32,7 +32,6 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    @ApiImplicitParam(name = "userRegisterRequest",required = true,value = "用户注册请求类:userAccount、userPassword、checkedPassword")
     @ApiOperation(value = "用户注册",notes = "注册")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
         if (userRegisterRequest == null) {
@@ -51,9 +50,6 @@ public class UserController {
 
     @PostMapping("/login")
     @ApiImplicitParams({
-            //@ApiImplicitParam(name = "userLoginRequest",required = true,value = "用户登录请求类包含两个属性"),
-//            @ApiImplicitParam(name = "userAccount",required = true,value = "账号"),
-//            @ApiImplicitParam(name = "userPassword",required = true,value = "密码"),
             @ApiImplicitParam(name = "request",required = true,value = "HttpServletRequest请求")
     })
     @ApiOperation(value = "用户登录",notes = "登录")

@@ -37,11 +37,11 @@ public class QuestionController {
     @Resource
     private QuestionService questionService;
 
+    //格式化JSON字符串
     private final static Gson GSON = new Gson();
 
     @PostMapping("/add")
     @ApiImplicitParams({
-            //@ApiImplicitParam(name = "addQuestionRequest",required = true,value = "题目添加请求类:questionTitle、questionContent、questionAnswer、questionTags、judgeCase、judgeConfig、questionDifficulty"),
             @ApiImplicitParam(name = "request",required = true,value = "HttpServletRequest请求")
     })
     @ApiOperation(value = "添加题目接口",notes = "添加题目接口")
@@ -68,7 +68,6 @@ public class QuestionController {
         String judgeConfigObjectJsonString = GSON.toJson(judgeConfig);
         String questionAnswer = addQuestionRequest.getQuestionAnswer();
         int questionDifficulty = addQuestionRequest.getQuestionDifficulty();
-        // Long createUser;
         if (questionDifficulty < 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"题目难度设置错误!");
         }
@@ -87,7 +86,6 @@ public class QuestionController {
     }
 
     @PostMapping("/edit")
-    @ApiImplicitParam(name = "addQuestionRequest",required = true,value = "题目添加请求类:questionTitle、questionContent、questionAnswer、questionTags、judgeCase、judgeConfig、questionDifficulty")
     @ApiOperation(value = "修改题目信息",notes = "修改题目信息")
     public BaseResponse<Boolean> editQuestion(@RequestBody EditQuestionRequest editQuestionRequest, HttpServletRequest request) {
         if (editQuestionRequest == null) {
@@ -109,18 +107,18 @@ public class QuestionController {
         String judgeCaseObjectJsonString = GSON.toJson(judgeCase);
         String judgeConfigObjectJsonString = GSON.toJson(judgeConfig);
         String questionAnswer = editQuestionRequest.getQuestionAnswer();
+        Integer questionStatus = editQuestionRequest.getQuestionStatus();
         int questionDifficulty = editQuestionRequest.getQuestionDifficulty();
-        // Long createUser;
-        if (questionId < 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"题目id不存在!");
-        }
         if (StringUtils.isAnyBlank(questionTitle,questionContent,questionAnswer,questionTagsJsonString,judgeCaseObjectJsonString,judgeConfigObjectJsonString)) {
             throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"题目信息设置有误!");
         }
         if (questionDifficulty < 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"题目难度设置错误!");
         }
-        Boolean result = questionService.editQuestion(questionId, questionTitle, questionContent, questionAnswer, questionTagsJsonString, judgeCaseObjectJsonString, judgeConfigObjectJsonString, questionDifficulty, request);
+        if (questionStatus == null || questionStatus < 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"题目状态设置有误!");
+        }
+        Boolean result = questionService.editQuestion(questionId, questionTitle, questionContent, questionAnswer, questionTagsJsonString, judgeCaseObjectJsonString, judgeConfigObjectJsonString, questionDifficulty, questionStatus, request);
         return ActionResultUtil.success(result);
     }
 

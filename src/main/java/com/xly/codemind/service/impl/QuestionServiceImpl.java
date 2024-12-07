@@ -73,13 +73,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         question.setJudgeCase(judgeCaseObjectJsonString);
         question.setJudgeConfig(judgeConfigObjectJsonString);
         question.setQuestionDifficulty(questionDifficulty);
-        // todo 获取登录用户方法优化？
-        Object sessionUser = request.getSession().getAttribute(USER_LOGIN_STATE);
-        if (sessionUser == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"用户未登录!");
-        }
-        User loginUser = (User) sessionUser;
-        question.setCreateUser(loginUser.getId());
+        question.setCreateUser(userService.getLoginUser(request).getId());
         //题目状态、题目提交数、题目通过数、创建时间、更新时间数据库有默认值
         int insertNum = questionMapper.insert(question);
         if (insertNum < 0) {
@@ -110,7 +104,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
     }
 
     @Override
-    public Boolean editQuestion(long questionId,String questionTitle, String questionContent, String questionAnswer, String questionTagsJsonString, String judgeCaseObjectString, String judgeConfigObjectString, int questionDifficulty, HttpServletRequest request) {
+    public Boolean editQuestion(long questionId,String questionTitle, String questionContent, String questionAnswer, String questionTagsJsonString, String judgeCaseObjectString, String judgeConfigObjectString, int questionDifficulty, Integer questionStatus, HttpServletRequest request) {
         //校验信息
         if (StringUtils.isAnyBlank(questionTitle,questionContent,questionAnswer,questionTagsJsonString,judgeCaseObjectString,judgeConfigObjectString)) {
             throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"题目信息设置有误!");
@@ -118,45 +112,17 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         if (questionDifficulty < 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"题目难度设置错误!");
         }
+        if (questionStatus  == null || questionStatus < 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"题目难度设置有误!");
+        }
         //题目存在才可以修改
         Question question = questionMapper.selectById(questionId);
         if (question == null) {
             throw new BusinessException(ErrorCode.NULL_ERROR,"题目不存在!");
         }
         // todo 只有管理员才可以修改题目
-        //旧内容
-        String oldQuestionTitle = question.getQuestionTitle();
-        String oldQuestionContent = question.getQuestionContent();
-        String oldQuestionAnswer = question.getQuestionAnswer();
-        String oldQuestionTags = question.getQuestionTags();
-        String oldJudgeCase = question.getJudgeCase();
-        String oldJudgeConfig = question.getJudgeConfig();
-        int oldQuestionDifficulty = question.getQuestionDifficulty();
-        //至少有一处内容有修改
-        boolean isChanged = false;
-        if (!StringUtils.equals(oldQuestionTitle,questionTitle)) {
-            isChanged = true;
-        }
-        if (!StringUtils.equals(oldQuestionContent,questionContent)) {
-            isChanged = true;
-        }
-        if (!StringUtils.equals(oldQuestionAnswer,questionAnswer)) {
-            isChanged = true;
-        }
-        if (!StringUtils.equals(oldQuestionTags, questionTagsJsonString)) {
-            isChanged = true;
-        }
-        if (!StringUtils.equals(oldJudgeCase,judgeCaseObjectString)) {
-            isChanged = true;
-        }
-        if (!StringUtils.equals(oldJudgeConfig,judgeConfigObjectString)) {
-            isChanged = true;
-        }
-        if (oldQuestionDifficulty != questionDifficulty) {
-            isChanged = true;
-        }
-        if (!isChanged) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"题目内容至少要有一处修改!");
+        if (!compareQuestionContent(questionTitle, questionContent, questionAnswer, questionTagsJsonString, judgeCaseObjectString, judgeConfigObjectString, questionDifficulty, questionStatus,question)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"至少要有一处修改!");
         }
         //获取修改人
         Object sessionUser = request.getSession().getAttribute(USER_LOGIN_STATE);
@@ -325,6 +291,45 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         adminQuestionVOPage.setRecords(questionVOList);
         return adminQuestionVOPage;
     }
+
+    private boolean compareQuestionContent(String questionTitle, String questionContent, String questionAnswer, String questionTagsJsonString, String judgeCaseObjectString, String judgeConfigObjectString, int questionDifficulty, Integer questionStatus,Question question) {
+        String oldQuestionTitle = question.getQuestionTitle();
+        String oldQuestionContent = question.getQuestionContent();
+        String oldQuestionAnswer = question.getQuestionAnswer();
+        String oldQuestionTags = question.getQuestionTags();
+        String oldJudgeCase = question.getJudgeCase();
+        String oldJudgeConfig = question.getJudgeConfig();
+        int oldQuestionDifficulty = question.getQuestionDifficulty();
+        int oldQuestionStatus = question.getQuestionStatus();
+        //至少有一处内容有修改
+        boolean isChanged = false;
+        if (!StringUtils.equals(oldQuestionTitle,questionTitle)) {
+            isChanged = true;
+        }
+        if (!StringUtils.equals(oldQuestionContent,questionContent)) {
+            isChanged = true;
+        }
+        if (!StringUtils.equals(oldQuestionAnswer,questionAnswer)) {
+            isChanged = true;
+        }
+        if (!StringUtils.equals(oldQuestionTags, questionTagsJsonString)) {
+            isChanged = true;
+        }
+        if (!StringUtils.equals(oldJudgeCase,judgeCaseObjectString)) {
+            isChanged = true;
+        }
+        if (!StringUtils.equals(oldJudgeConfig,judgeConfigObjectString)) {
+            isChanged = true;
+        }
+        if (oldQuestionDifficulty != questionDifficulty) {
+            isChanged = true;
+        }
+        if (oldQuestionStatus != questionStatus) {
+            isChanged = true;
+        }
+        return isChanged;
+    }
+
 
 }
 
