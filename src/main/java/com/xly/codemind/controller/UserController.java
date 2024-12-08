@@ -3,6 +3,7 @@ package com.xly.codemind.controller;
 import com.xly.codemind.common.BaseResponse;
 import com.xly.codemind.common.ErrorCode;
 import com.xly.codemind.exception.BusinessException;
+import com.xly.codemind.model.bean.User;
 import com.xly.codemind.model.dto.user.UserLoginRequest;
 import com.xly.codemind.model.dto.user.UserRegisterRequest;
 import com.xly.codemind.model.vo.LoginUserVO;
@@ -26,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/user")
 @Slf4j
+@CrossOrigin(origins = "http://localhost:8080", allowCredentials = "true")
 public class UserController {
 
     @Resource
@@ -64,6 +66,18 @@ public class UserController {
         }
         LoginUserVO userVO = userService.userLogin(userAccount, userPassword, request);
         return ActionResultUtil.success(userVO);
+    }
+
+    /**
+     * 获取当前登录用户的脱敏信息（仅前端使用）
+     * @param request HttpServletRequest
+     * @return 当前登录用户的脱敏信息
+     */
+    @GetMapping("/get/login")
+    @ApiOperation(value = "获取登录用户的脱敏信息",notes = "获取登录用户的脱敏信息")
+    public BaseResponse<LoginUserVO> getLoginUser(HttpServletRequest request) {
+        User user = userService.getLoginUser(request);
+        return ActionResultUtil.success(userService.getLoginUserVO(user));
     }
 
     @PostMapping("/logout")

@@ -2,7 +2,7 @@
 # @author X_LY。
 server:
   port:
-    8080
+    8081
   servlet:
     context-path: /api
 spring:

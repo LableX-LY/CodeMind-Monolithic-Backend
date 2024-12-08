@@ -281,11 +281,11 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         List<AdminQuestionVO> questionVOList = questionList.stream().map(question -> {
             AdminQuestionVO adminQuestionVO = AdminQuestionVO.objToVo(question);
             Long createUser = question.getCreateUser();
-            User user = null;
+            User user1 = null;
             if (createUserListMap.containsKey(createUser)) {
-                user = createUserListMap.get(createUser).get(0);
+                user1 = createUserListMap.get(createUser).get(0);
             }
-            adminQuestionVO.setCreateUser(userService.getUserVO(user).getId());
+            adminQuestionVO.setCreateUser(userService.getUserVO(user1).getId());
             return adminQuestionVO;
         }).collect(Collectors.toList());
         adminQuestionVOPage.setRecords(questionVOList);
