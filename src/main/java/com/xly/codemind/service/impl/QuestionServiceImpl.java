@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.xly.codemind.common.ErrorCode;
-import com.xly.codemind.common.IdWorker;
 import com.xly.codemind.exception.BusinessException;
 import com.xly.codemind.mapper.QuestionMapper;
 import com.xly.codemind.model.bean.Question;
@@ -18,6 +17,7 @@ import com.xly.codemind.model.vo.AdminQuestionVO;
 import com.xly.codemind.model.vo.UserQuestionVO;
 import com.xly.codemind.service.QuestionService;
 import com.xly.codemind.service.UserService;
+import com.xly.codemind.utils.IdWorkerUtil;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -61,11 +61,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"题目难度设置错误!");
         }
         Question question = new Question();
-        long id = IdWorker.getInstance().nextId();
-        if (id == 0) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"IdWorker发生错误,id生成失败!");
-        }
         // todo 只有管理员才可以添加题目
+        question.setId(IdWorkerUtil.generateId());
         question.setQuestionTitle(questionTitle);
         question.setQuestionContent(questionContent);
         question.setQuestionAnswer(questionAnswer);

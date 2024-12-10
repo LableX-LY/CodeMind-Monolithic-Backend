@@ -33,6 +33,11 @@ public class QuestionSubmit implements Serializable {
     private Long questionId;
 
     /**
+     * 题目标题
+     */
+    private String questionTitle;;
+
+    /**
      * 题目使用的编程语言
      */
     private String questionLanguage;
@@ -85,7 +90,7 @@ public class QuestionSubmit implements Serializable {
         QuestionSubmit other = (QuestionSubmit) that;
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
             && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
-            && (this.getQuestionId() == null ? other.getQuestionId() == null : this.getQuestionId().equals(other.getQuestionId()))
+            && (this.getQuestionId() == null ? other.getQuestionId() == null : this.getQuestionId().equals(other.getQuestionId())) && (this.getQuestionTitle() == null ? other.getQuestionTitle() == null : this.getQuestionTitle().equals(other.getQuestionTitle()))
             && (this.getQuestionLanguage() == null ? other.getQuestionLanguage() == null : this.getQuestionLanguage().equals(other.getQuestionLanguage()))
             && (this.getQuestionCode() == null ? other.getQuestionCode() == null : this.getQuestionCode().equals(other.getQuestionCode()))
             && (this.getJudgeStatus() == null ? other.getJudgeStatus() == null : this.getJudgeStatus().equals(other.getJudgeStatus()))
@@ -102,6 +107,7 @@ public class QuestionSubmit implements Serializable {
         result = prime * result + ((getId() == null) ? 0 : getId().hashCode());
         result = prime * result + ((getUserId() == null) ? 0 : getUserId().hashCode());
         result = prime * result + ((getQuestionId() == null) ? 0 : getQuestionId().hashCode());
+        result = prime * result + ((getQuestionTitle() == null) ? 0 : getQuestionTitle().hashCode());
         result = prime * result + ((getQuestionLanguage() == null) ? 0 : getQuestionLanguage().hashCode());
         result = prime * result + ((getQuestionCode() == null) ? 0 : getQuestionCode().hashCode());
         result = prime * result + ((getJudgeStatus() == null) ? 0 : getJudgeStatus().hashCode());
@@ -121,6 +127,7 @@ public class QuestionSubmit implements Serializable {
         sb.append(", id=").append(id);
         sb.append(", userId=").append(userId);
         sb.append(", questionId=").append(questionId);
+        sb.append(", questionTitle=").append(questionTitle);
         sb.append(", questionLanguage=").append(questionLanguage);
         sb.append(", questionCode=").append(questionCode);
         sb.append(", judgeStatus=").append(judgeStatus);

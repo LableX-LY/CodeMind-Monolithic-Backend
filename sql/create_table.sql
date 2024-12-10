@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS question_submit
     id 								BIGINT 																					PRIMARY KEY COMMENT 'id',
     userId 						BIGINT 																					NOT NULL COMMENT '提交者',
     questionId 				BIGINT 																					NOT NULL COMMENT '题目id',
+    questionTitle       VARCHAR(128)                                                        NULL     COMMENT '题目标题',
     questionLanguage 	VARCHAR(128) 		DEFAULT 'java'									NOT NULL COMMENT '题目使用的编程语言',
     questionCode 			TEXT 																						NOT NULL COMMENT '用户代码',
     judgeStatus 			INT 						DEFAULT 0 											NOT NULL COMMENT '判题状态,0-待判题、1-判题中、2-判题成功、3-判题失败',

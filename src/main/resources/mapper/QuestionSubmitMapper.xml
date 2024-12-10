@@ -8,6 +8,7 @@
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="userId" column="userId" jdbcType="BIGINT"/>
             <result property="questionId" column="questionId" jdbcType="BIGINT"/>
+            <result property="questionTitle" column="questionTitle" jdbcType="VARCHAR"/>
             <result property="questionLanguage" column="questionLanguage" jdbcType="VARCHAR"/>
             <result property="questionCode" column="questionCode" jdbcType="VARCHAR"/>
             <result property="judgeStatus" column="judgeStatus" jdbcType="INTEGER"/>
@@ -18,7 +19,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,userId,questionId,
+        id,userId,questionId,questionTitle,
         questionLanguage,questionCode,judgeStatus,
         judgeInfo,createTime,updateTime,
         isDelete

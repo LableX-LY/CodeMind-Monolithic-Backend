@@ -6,15 +6,19 @@ import com.xly.codemind.common.BaseResponse;
 import com.xly.codemind.common.ErrorCode;
 import com.xly.codemind.exception.BusinessException;
 import com.xly.codemind.model.bean.Question;
+import com.xly.codemind.model.bean.User;
 import com.xly.codemind.model.dto.question.*;
 import com.xly.codemind.model.vo.AdminQuestionVO;
 import com.xly.codemind.model.vo.UserQuestionVO;
 import com.xly.codemind.service.QuestionService;
+import com.xly.codemind.service.QuestionSubmitService;
+import com.xly.codemind.service.UserService;
 import com.xly.codemind.utils.ActionResultUtil;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +39,13 @@ import java.util.List;
 public class QuestionController {
 
     @Resource
+    private UserService userService;
+
+    @Resource
     private QuestionService questionService;
+
+    @Resource
+    private QuestionSubmitService questionSubmitService;
 
     //格式化JSON字符串
     private final static Gson GSON = new Gson();
@@ -150,6 +160,28 @@ public class QuestionController {
                 questionService.getAdminQueryWrapper(adminQueryQuestionRequest));
         Page<AdminQuestionVO> adminQuestionVOByPage = questionService.getAdminQuestionVOByPage(adminQuestionPageQueryWrapper);
         return ActionResultUtil.success(adminQuestionVOByPage);
+    }
+
+    @PostMapping("/submit")
+    @ApiOperation(value = "用户提交代码,发起判题请求", notes = "用户提交代码,发起判题请求")
+    public BaseResponse<Long> doQuestionSubmit(@RequestBody QuestionSubmitAddRequest questionSubmitAddRequest,
+                                               HttpServletRequest request) {
+        if (questionSubmitAddRequest == null || request == null) {
+            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"请求参数错误!");
+        }
+        //只有在登录的前提下才可以答题
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"用户未登录,请先登录!");
+        }
+        Long questionId = questionSubmitAddRequest.getId();
+        String questionCode = questionSubmitAddRequest.getQuestionCode();
+        String questionLanguage = questionSubmitAddRequest.getQuestionLanguage();
+        if (ObjectUtils.isEmpty(questionId) || questionId < 0 ||StringUtils.isAnyBlank(questionCode,questionLanguage)) {
+            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"请求参数错误!");
+        }
+        Long questionSubmitedId = questionSubmitService.doQuestionSubmit(questionId,questionCode,questionLanguage,loginUser);
+        return ActionResultUtil.success(questionSubmitedId);
     }
 
 }
