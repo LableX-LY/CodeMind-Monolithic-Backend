@@ -3,7 +3,6 @@ package com.xly.codemind.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xly.codemind.common.ErrorCode;
-import com.xly.codemind.common.IdWorker;
 import com.xly.codemind.constant.UserConstant;
 import com.xly.codemind.exception.BusinessException;
 import com.xly.codemind.mapper.UserMapper;
@@ -11,6 +10,7 @@ import com.xly.codemind.model.bean.User;
 import com.xly.codemind.model.vo.LoginUserVO;
 import com.xly.codemind.model.vo.UserVO;
 import com.xly.codemind.service.UserService;
+import com.xly.codemind.utils.IdWorkerUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -69,11 +69,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         user.setUserProfile("这个人很懒，什么都没有写");
         user.setUserRole("user");
         user.setUserStatus(0);
-        long id = IdWorker.getInstance().nextId();
-        if (id < 0) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"系统内部异常,id生成失败!");
-        }
-        user.setId(id);
+        user.setId(IdWorkerUtil.generateId());
         int insert = userMapper.insert(user);
         if (insert < 0) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"系统内部异常，请稍后重试!");
@@ -163,6 +159,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         loginUser.setUserBirthday(user.getUserBirthday());
         loginUser.setUserGender(user.getUserGender());
         loginUser.setUserEmail(user.getUserEmail());
+        loginUser.setUserRole(user.getUserRole());
         return loginUser;
     }
 
