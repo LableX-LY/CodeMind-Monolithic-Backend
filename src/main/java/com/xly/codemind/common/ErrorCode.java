@@ -22,6 +22,8 @@ public enum ErrorCode {
 
     QUESTION_BAN_ERROR(40106,"题目被禁用",""),
 
+    OPERATION_ERROR(40107,"题目正在判题中",""),
+
     SYSTEM_ERROR(50000,"系统内部异常",""),
 
     NULL_ERROR(40002,"查询结果为空","");;
