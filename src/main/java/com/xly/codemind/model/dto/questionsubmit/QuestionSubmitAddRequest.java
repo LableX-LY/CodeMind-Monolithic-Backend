@@ -1,4 +1,4 @@
-package com.xly.codemind.model.dto.question;
+package com.xly.codemind.model.dto.questionsubmit;
 
 import lombok.Data;
 
@@ -28,6 +28,11 @@ public class QuestionSubmitAddRequest implements Serializable {
      * 题目语言
      */
     private String questionLanguage;
+
+    /**
+     * 题目标题
+     */
+    private String questionTitle;
 
     private static final long serialVersionUID = 1L;
 

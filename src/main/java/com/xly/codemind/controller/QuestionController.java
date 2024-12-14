@@ -8,6 +8,7 @@ import com.xly.codemind.exception.BusinessException;
 import com.xly.codemind.model.bean.Question;
 import com.xly.codemind.model.bean.User;
 import com.xly.codemind.model.dto.question.*;
+import com.xly.codemind.model.dto.questionsubmit.QuestionSubmitAddRequest;
 import com.xly.codemind.model.vo.AdminQuestionVO;
 import com.xly.codemind.model.vo.UserQuestionVO;
 import com.xly.codemind.service.QuestionService;
@@ -177,7 +178,8 @@ public class QuestionController {
         Long questionId = questionSubmitAddRequest.getId();
         String questionCode = questionSubmitAddRequest.getQuestionCode();
         String questionLanguage = questionSubmitAddRequest.getQuestionLanguage();
-        if (ObjectUtils.isEmpty(questionId) || questionId < 0 ||StringUtils.isAnyBlank(questionCode,questionLanguage)) {
+        String questionTitle = questionSubmitAddRequest.getQuestionTitle();
+        if (ObjectUtils.isEmpty(questionId) || questionId < 0 ||StringUtils.isAnyBlank(questionCode,questionLanguage,questionTitle)) {
             throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"请求参数错误!");
         }
         Long questionSubmitedId = questionSubmitService.doQuestionSubmit(questionId,questionCode,questionLanguage,loginUser);

@@ -26,7 +26,9 @@ public enum ErrorCode {
 
     SYSTEM_ERROR(50000,"系统内部异常",""),
 
-    NULL_ERROR(40002,"查询结果为空","");;
+    API_REQUEST_ERROR(50010, "接口调用失败",""),
+
+    NULL_ERROR(40002,"查询结果为空","");
 
     private final int code;
 
