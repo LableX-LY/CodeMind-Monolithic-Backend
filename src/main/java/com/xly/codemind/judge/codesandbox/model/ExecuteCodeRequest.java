@@ -22,7 +22,7 @@ public class ExecuteCodeRequest {
     /**
      * 输入用例（数据库中获取）
      */
-    private List<String> inputList;
+    private List<List<String>> inputList;
 
     /**
      * 用户代码

@@ -14,6 +14,7 @@ import com.xly.codemind.model.bean.Question;
 import com.xly.codemind.model.bean.QuestionSubmit;
 import com.xly.codemind.model.dto.question.JudgeCase;
 import com.xly.codemind.model.enums.QuestionSubmitStatusEnum;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
  * @description
  **/
 
+@Service
 public class JudgeServiceImpl implements JudgeService{
 
     @Resource
@@ -35,9 +37,9 @@ public class JudgeServiceImpl implements JudgeService{
     private QuestionSubmitMapper questionSubmitMapper;
 
     @Override
-    public QuestionSubmit doJudge(long questionSubmitId) {
+    public QuestionSubmit doJudge(long questionSubmitedId) {
         //首先查询题目提交记录
-        QuestionSubmit questionSubmit = questionSubmitMapper.selectById(questionSubmitId);
+        QuestionSubmit questionSubmit = questionSubmitMapper.selectById(questionSubmitedId);
         if (questionSubmit == null) {
             throw new BusinessException(ErrorCode.NULL_ERROR,"题目提交记录不存在!");
         }
@@ -71,12 +73,15 @@ public class JudgeServiceImpl implements JudgeService{
         String questionLanguage = questionSubmit.getQuestionLanguage();
         String judgeCaseString = question.getJudgeCase();
         List<JudgeCase> judgeCaseList = JSONUtil.toList(judgeCaseString, JudgeCase.class);
-        List<String> inputList = judgeCaseList.stream().map(JudgeCase::getInput).collect(Collectors.toList());
+        List<List<String>> inputList = judgeCaseList.stream().map(JudgeCase::getInput).collect(Collectors.toList());
+        System.out.println(inputList.size());
+        System.out.println(inputList);
         ExecuteCodeRequest executeCodeRequest = ExecuteCodeRequest.builder()
                 .questionCode(questionCode)
                 .questionLanguage(questionLanguage)
                 .inputList(inputList)
                 .build();
+        List<List<String>> inputList1 = executeCodeRequest.getInputList();
         //请求代码沙箱，执行代码
         ExecuteCodeResponse executeCodeResponse = remoteCodeSandbox.executeCode(executeCodeRequest);
         //获取输出响应，与数据库中的题目答案进行比对
@@ -86,4 +91,3 @@ public class JudgeServiceImpl implements JudgeService{
     }
 
 }
-

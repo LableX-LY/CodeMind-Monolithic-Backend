@@ -3,6 +3,7 @@ package com.xly.codemind.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xly.codemind.common.ErrorCode;
 import com.xly.codemind.exception.BusinessException;
+import com.xly.codemind.judge.JudgeService;
 import com.xly.codemind.mapper.QuestionMapper;
 import com.xly.codemind.mapper.QuestionSubmitMapper;
 import com.xly.codemind.model.bean.Question;
@@ -13,9 +14,11 @@ import com.xly.codemind.service.QuestionSubmitService;
 import com.xly.codemind.utils.IdWorkerUtil;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.concurrent.CompletableFuture;
 
 /**
 * @author x-ly
@@ -31,6 +34,9 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
 
     @Resource
     private QuestionSubmitMapper questionSubmitMapper;
+
+    @Autowired
+    private JudgeService judgeService;
 
     @Override
     public Long doQuestionSubmit(Long questionId, String questionCode, String questionLanguage, User loginUser) {
@@ -50,6 +56,7 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         //此条记录的id
         questionSubmit.setId(IdWorkerUtil.generateId());
         questionSubmit.setUserId(loginUser.getId());
+        questionSubmit.setQuestionId(questionId);
         questionSubmit.setQuestionTitle(question.getQuestionTitle());
         questionSubmit.setQuestionCode(questionCode);
         questionSubmit.setQuestionLanguage(questionLanguage);
@@ -59,12 +66,12 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         if (insert != 1) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "题目提交记录插入失败!");
         }
-        Long questionSubmitEdId = questionSubmit.getId();
+        Long questionSubmitedId = questionSubmit.getId();
         // 执行判题服务,异步操作
-//        CompletableFuture.runAsync(() -> {
-//            judgeService.doJudge(questionSubmitId);
-//        });
-        return questionSubmitEdId;
+        CompletableFuture.runAsync(() -> {
+            judgeService.doJudge(questionSubmitedId);
+        });
+        return questionSubmitedId;
     }
 }
 

@@ -3,6 +3,7 @@ package com.xly.codemind.model.dto.question;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author X-LY。
@@ -17,7 +18,7 @@ public class JudgeCase implements Serializable {
     /**
      * 输入用例
      */
-    private String input;
+    private List<String> input;
 
     /**
      * 输出用例
