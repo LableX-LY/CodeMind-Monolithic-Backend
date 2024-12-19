@@ -37,15 +37,15 @@ public class JudgeServiceImpl implements JudgeService{
     private QuestionSubmitMapper questionSubmitMapper;
 
     @Override
-    public QuestionSubmit doJudge(long questionSubmitedId) {
+    public QuestionSubmit doJudge(long questionSubmitedId,long userId,long questionId) {
         //首先查询题目提交记录
         QuestionSubmit questionSubmit = questionSubmitMapper.selectById(questionSubmitedId);
         if (questionSubmit == null) {
             throw new BusinessException(ErrorCode.NULL_ERROR,"题目提交记录不存在!");
         }
         //获取对应的题目id，查询题目是否存在及题目状态是否正常
-        long questionId = questionSubmit.getQuestionId();
-        Question question = questionMapper.selectById(questionId);
+        long questionIdBySubmited = questionSubmit.getQuestionId();
+        Question question = questionMapper.selectById(questionIdBySubmited);
         if (question == null) {
             throw new BusinessException(ErrorCode.NULL_ERROR,"题目不存在!");
         }
@@ -80,8 +80,10 @@ public class JudgeServiceImpl implements JudgeService{
                 .questionCode(questionCode)
                 .questionLanguage(questionLanguage)
                 .inputList(inputList)
+                .userId(userId)
+                .questionId(questionId)
                 .build();
-        List<List<String>> inputList1 = executeCodeRequest.getInputList();
+//        List<List<String>> inputList1 = executeCodeRequest.getInputList();
         //请求代码沙箱，执行代码
         ExecuteCodeResponse executeCodeResponse = remoteCodeSandbox.executeCode(executeCodeRequest);
         //获取输出响应，与数据库中的题目答案进行比对

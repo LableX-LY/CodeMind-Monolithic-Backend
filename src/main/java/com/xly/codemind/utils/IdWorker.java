@@ -1,4 +1,4 @@
-package com.xly.codemind.common;
+package com.xly.codemind.utils;
 
 import org.springframework.stereotype.Component;
 

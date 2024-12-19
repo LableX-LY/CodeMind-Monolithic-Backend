@@ -16,5 +16,5 @@ public interface JudgeService {
      * @param questionSubmitedId 题目提交记录的id
      * @return 判题信息
      */
-    QuestionSubmit doJudge(long questionSubmitedId);
+    QuestionSubmit doJudge(long questionSubmitedId,long userId,long questionId);
 }

@@ -20,6 +20,16 @@ import java.util.List;
 public class ExecuteCodeRequest {
 
     /**
+     * 答题者的id
+     */
+    private Long userId;
+
+    /**
+     * 题目id
+     */
+    private Long questionId;
+
+    /**
      * 输入用例（数据库中获取）
      */
     private List<List<String>> inputList;
