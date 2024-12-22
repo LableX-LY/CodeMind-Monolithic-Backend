@@ -35,7 +35,7 @@ public class QuestionSubmit implements Serializable {
     /**
      * 题目标题
      */
-    private String questionTitle;;
+    private String questionTitle;
 
     /**
      * 题目使用的编程语言
@@ -48,7 +48,7 @@ public class QuestionSubmit implements Serializable {
     private String questionCode;
 
     /**
-     * 判题状态,0-待判题、1-判题中、2-判题成功、3-判题失败
+     * 判题状态,0-待判题、1-判题中、2-判题成功、3-判题失败、4-题目编译失败
      */
     private Integer judgeStatus;
 

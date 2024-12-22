@@ -20,6 +20,9 @@ import java.util.List;
 @AllArgsConstructor
 public class ExecuteCodeResponse {
 
+    /**
+     * 输出信息
+     */
     private List<String> outputList;
 
     /**
@@ -28,7 +31,7 @@ public class ExecuteCodeResponse {
     private String message;
 
     /**
-     * 执行状态
+     * 执行状态,1-正常、3-编译错误
      */
     private Integer status;
 

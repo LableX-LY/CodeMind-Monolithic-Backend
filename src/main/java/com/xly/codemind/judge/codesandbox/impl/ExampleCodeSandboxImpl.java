@@ -28,7 +28,7 @@ public class ExampleCodeSandboxImpl implements CodeSandbox {
         outputList.add("202412141455");
         outputList.add("202412141456");
         executeCodeResponse.setOutputList(outputList);
-        JudgeInfo judgeInfo = new JudgeInfo();
+        JudgeInfo judgeInfo = new JudgeInfo("示例代码沙箱运行成功",0L,0L);
         judgeInfo.setMessage("示例代码沙箱执行成功");
         judgeInfo.setTime(1L);
         judgeInfo.setMemory(2L);

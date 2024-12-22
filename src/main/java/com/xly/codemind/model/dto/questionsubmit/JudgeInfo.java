@@ -1,6 +1,7 @@
 package com.xly.codemind.model.dto.questionsubmit;
 
 import com.xly.codemind.model.bean.Question;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
  * @description 判题信息（执行时间、内存占用等信息）
  **/
 @Data
+@AllArgsConstructor
 public class JudgeInfo {
 
     /**
@@ -25,9 +27,9 @@ public class JudgeInfo {
      * 消耗时间 ms
      */
     private Long time;
-    /**
-     * 具体的判题题目
-     */
-    private Question question;
+//    /**
+//     * 具体的判题题目
+//     */
+//    private Question question;
 
 }

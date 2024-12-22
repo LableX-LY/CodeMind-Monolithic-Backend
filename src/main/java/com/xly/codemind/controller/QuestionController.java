@@ -176,7 +176,7 @@ public class QuestionController {
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"用户未登录,请先登录!");
         }
-        Long questionId = questionSubmitAddRequest.getId();
+        Long questionId = questionSubmitAddRequest.getQuestionId();
         String questionCode = questionSubmitAddRequest.getQuestionCode();
         String questionLanguage = questionSubmitAddRequest.getQuestionLanguage();
         String questionTitle = questionSubmitAddRequest.getQuestionTitle();

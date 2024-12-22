@@ -13,7 +13,9 @@ import com.xly.codemind.mapper.QuestionSubmitMapper;
 import com.xly.codemind.model.bean.Question;
 import com.xly.codemind.model.bean.QuestionSubmit;
 import com.xly.codemind.model.dto.question.JudgeCase;
+import com.xly.codemind.model.dto.questionsubmit.JudgeInfo;
 import com.xly.codemind.model.enums.QuestionSubmitStatusEnum;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -86,8 +88,30 @@ public class JudgeServiceImpl implements JudgeService{
 //        List<List<String>> inputList1 = executeCodeRequest.getInputList();
         //请求代码沙箱，执行代码
         ExecuteCodeResponse executeCodeResponse = remoteCodeSandbox.executeCode(executeCodeRequest);
-        //获取输出响应，与数据库中的题目答案进行比对
+        //获取输出响应，首先判断题目是否发生编译错误
         List<String> outputList = executeCodeResponse.getOutputList();
+        JudgeInfo judgeInfo = executeCodeResponse.getJudgeInfo();
+        int status = executeCodeResponse.getStatus();
+        //输出为空、判题信息为空且status为3，一定发生编译异常
+        if (status == 3 && ObjectUtils.isEmpty(outputList) && ObjectUtils.isEmpty(judgeInfo)) {
+            //题目编译异常，设置题目提交状态为编译异常，judgeInfo也为编译异常
+            //题目发生编译异常时，其实根本就没有触发判题服务（判题服务是指根据代码沙箱的输出和数据库中的答案进行比对）
+            //所以当题目发生编译异常时题目提价状态应该单独设置
+            //同步更新题目提交记录数
+            questionSubmit.setJudgeStatus(QuestionSubmitStatusEnum.COMPILEFAILED.getValue());
+            JudgeInfo compileErrorJudgeInfo = new JudgeInfo("编译失败",0L,0L);
+            questionSubmit.setJudgeInfo(JSONUtil.toJsonStr(compileErrorJudgeInfo));
+            question.setSubmitNum(question.getSubmitNum() + 1);
+            // todo 这里应该加事务，确保题目提交状态的修改和题目数量的修改是同步的
+            if (questionMapper.updateById(question) < 1) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR,"题目提交数更新失败");
+            }
+            if (questionSubmitMapper.updateById(questionSubmit) < 1) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR,"题目状态更新失败");
+            }
+            return questionSubmitMapper.selectById(questionSubmit.getId());
+        }
+        //输出不为空，则代码编译和运行正常，根据outoutlist比对数据库，进行判题
 
         return null;
     }
