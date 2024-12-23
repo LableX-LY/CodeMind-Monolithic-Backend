@@ -27,6 +27,7 @@ public class JudgeInfo {
      * 消耗时间 ms
      */
     private Long time;
+
 //    /**
 //     * 具体的判题题目
 //     */

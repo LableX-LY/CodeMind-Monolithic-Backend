@@ -8,11 +8,13 @@ import com.xly.codemind.judge.codesandbox.CodeSandbox;
 import com.xly.codemind.judge.codesandbox.CodeSandboxProxy;
 import com.xly.codemind.judge.codesandbox.model.ExecuteCodeRequest;
 import com.xly.codemind.judge.codesandbox.model.ExecuteCodeResponse;
+import com.xly.codemind.judge.codesandbox.model.JudgeContext;
 import com.xly.codemind.mapper.QuestionMapper;
 import com.xly.codemind.mapper.QuestionSubmitMapper;
 import com.xly.codemind.model.bean.Question;
 import com.xly.codemind.model.bean.QuestionSubmit;
 import com.xly.codemind.model.dto.question.JudgeCase;
+import com.xly.codemind.model.dto.question.JudgeConfig;
 import com.xly.codemind.model.dto.questionsubmit.JudgeInfo;
 import com.xly.codemind.model.enums.QuestionSubmitStatusEnum;
 import org.apache.commons.lang3.ObjectUtils;
@@ -37,6 +39,9 @@ public class JudgeServiceImpl implements JudgeService{
 
     @Resource
     private QuestionSubmitMapper questionSubmitMapper;
+
+    @Resource
+    private JudgeManager judgeManager;
 
     @Override
     public QuestionSubmit doJudge(long questionSubmitedId,long userId,long questionId) {
@@ -112,6 +117,13 @@ public class JudgeServiceImpl implements JudgeService{
             return questionSubmitMapper.selectById(questionSubmit.getId());
         }
         //输出不为空，则代码编译和运行正常，根据outoutlist比对数据库，进行判题
+        JudgeContext judgeContext = new JudgeContext();
+        judgeContext.setOutputList(outputList);
+        //todo 前端传递题目答案时需要在每个答案之间加上逗号？后端自行解析？
+        judgeContext.setQuestionAnswer(question.getQuestionAnswer());
+        judgeContext.setJudgeInfo(judgeInfo);
+        judgeContext.setJudgeConfig(JSONUtil.toBean(question.getJudgeConfig(), JudgeConfig.class));
+        JudgeInfo judgeInfoResult = judgeManager.doJudge(questionLanguage, judgeContext);
 
         return null;
     }
