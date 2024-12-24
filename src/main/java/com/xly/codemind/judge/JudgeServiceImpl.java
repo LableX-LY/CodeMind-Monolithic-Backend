@@ -16,11 +16,13 @@ import com.xly.codemind.model.bean.QuestionSubmit;
 import com.xly.codemind.model.dto.question.JudgeCase;
 import com.xly.codemind.model.dto.question.JudgeConfig;
 import com.xly.codemind.model.dto.questionsubmit.JudgeInfo;
+import com.xly.codemind.model.enums.JudgeInfoMessageEnum;
 import com.xly.codemind.model.enums.QuestionSubmitStatusEnum;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,7 +30,8 @@ import java.util.stream.Collectors;
  * @author X-LY。
  * @version 1.0
  * @createtime 2024/12/13 19:34
- * @description
+ * @description 判题服务（判题流程调用judgeManager）
+ *              该类负责调用代码沙箱,根据judgeManager的返回结果修改数据库
  **/
 
 @Service
@@ -94,6 +97,7 @@ public class JudgeServiceImpl implements JudgeService{
         //请求代码沙箱，执行代码
         ExecuteCodeResponse executeCodeResponse = remoteCodeSandbox.executeCode(executeCodeRequest);
         //获取输出响应，首先判断题目是否发生编译错误
+        System.out.println("代码沙箱响应" + executeCodeResponse);
         List<String> outputList = executeCodeResponse.getOutputList();
         JudgeInfo judgeInfo = executeCodeResponse.getJudgeInfo();
         int status = executeCodeResponse.getStatus();
@@ -124,8 +128,58 @@ public class JudgeServiceImpl implements JudgeService{
         judgeContext.setJudgeInfo(judgeInfo);
         judgeContext.setJudgeConfig(JSONUtil.toBean(question.getJudgeConfig(), JudgeConfig.class));
         JudgeInfo judgeInfoResult = judgeManager.doJudge(questionLanguage, judgeContext);
+        //根据返回的judgeInfoResult中的message判断答题情况，进而修改数据库中的答题情况
+        String judgeResult = judgeInfoResult.getMessage();
+        if (judgeResult.equals(JudgeInfoMessageEnum.ACCEPTED.getValue())) {
+            questionSubmit.setJudgeStatus(2);
+            questionSubmit.setUpdateTime(new Date());
+            if (questionSubmitMapper.updateById(questionSubmit) < 0) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR,"题目提交状态更新失败!");
+            }
+            return questionSubmit;
+        }
+        if (judgeResult.equals(JudgeInfoMessageEnum.WRONG_ANSWER.getValue())) {
+            questionSubmit.setJudgeStatus(3);
+            questionSubmit.setUpdateTime(new Date());
+            if (questionSubmitMapper.updateById(questionSubmit) < 0) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR,"题目提交状态更新失败!");
+            }
+            return questionSubmitMapper.selectById(questionSubmitedId);
+        }
+        if (judgeResult.equals(JudgeInfoMessageEnum.TIME_LIMIT_EXCEEDED.getValue())) {
+            questionSubmit.setJudgeStatus(5);
+            questionSubmit.setUpdateTime(new Date());
+            if (questionSubmitMapper.updateById(questionSubmit) < 0) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR,"题目提交状态更新失败!");
+            }
+            return questionSubmitMapper.selectById(questionSubmitedId);
+        }
+        if (judgeResult.equals(JudgeInfoMessageEnum.MEMORY_LIMIT_EXCEEDED.getValue())) {
+            questionSubmit.setJudgeStatus(6);
+            questionSubmit.setUpdateTime(new Date());
+            if (questionSubmitMapper.updateById(questionSubmit) < 0) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR,"题目提交状态更新失败!");
+            }
+            return questionSubmitMapper.selectById(questionSubmitedId);
+        }
+        if (judgeResult.equals(JudgeInfoMessageEnum.OUTPUT_LIMIT_MISSING.getValue())) {
+            questionSubmit.setJudgeStatus(7);
+            questionSubmit.setUpdateTime(new Date());
+            if (questionSubmitMapper.updateById(questionSubmit) < 0) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR,"题目提交状态更新失败!");
+            }
+            return questionSubmitMapper.selectById(questionSubmitedId);
+        }
+        if (judgeResult.equals(JudgeInfoMessageEnum.OUTPUT_LIMIT_EXCEEDED.getValue())) {
+            questionSubmit.setJudgeStatus(8);
+            questionSubmit.setUpdateTime(new Date());
+            if (questionSubmitMapper.updateById(questionSubmit) < 0) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR,"题目提交状态更新失败!");
+            }
+            return questionSubmitMapper.selectById(questionSubmitedId);
+        }
+        return questionSubmitMapper.selectById(questionSubmitedId);
 
-        return null;
     }
 
 }
