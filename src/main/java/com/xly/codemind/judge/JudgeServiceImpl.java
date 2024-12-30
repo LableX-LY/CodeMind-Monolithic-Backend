@@ -131,48 +131,60 @@ public class JudgeServiceImpl implements JudgeService{
         //根据返回的judgeInfoResult中的message判断答题情况，进而修改数据库中的答题情况
         String judgeResult = judgeInfoResult.getMessage();
         if (judgeResult.equals(JudgeInfoMessageEnum.ACCEPTED.getValue())) {
+            JudgeInfo acceptedJudgeInfo = new JudgeInfo("答案正确",0L,0L);
             questionSubmit.setJudgeStatus(2);
             questionSubmit.setUpdateTime(new Date());
+            questionSubmit.setJudgeInfo(JSONUtil.toJsonStr(acceptedJudgeInfo));
             if (questionSubmitMapper.updateById(questionSubmit) < 0) {
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR,"题目提交状态更新失败!");
             }
             return questionSubmit;
         }
         if (judgeResult.equals(JudgeInfoMessageEnum.WRONG_ANSWER.getValue())) {
+            JudgeInfo wrongAnswerJudgeInfo = new JudgeInfo("答案错误",0L,0L);
             questionSubmit.setJudgeStatus(3);
             questionSubmit.setUpdateTime(new Date());
+            questionSubmit.setJudgeInfo(JSONUtil.toJsonStr(wrongAnswerJudgeInfo));
             if (questionSubmitMapper.updateById(questionSubmit) < 0) {
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR,"题目提交状态更新失败!");
             }
             return questionSubmitMapper.selectById(questionSubmitedId);
         }
         if (judgeResult.equals(JudgeInfoMessageEnum.TIME_LIMIT_EXCEEDED.getValue())) {
+            JudgeInfo timeLimitExceededJudgeInfo = new JudgeInfo("运行超时",0L,0L);
             questionSubmit.setJudgeStatus(5);
             questionSubmit.setUpdateTime(new Date());
+            questionSubmit.setJudgeInfo(JSONUtil.toJsonStr(timeLimitExceededJudgeInfo));
             if (questionSubmitMapper.updateById(questionSubmit) < 0) {
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR,"题目提交状态更新失败!");
             }
             return questionSubmitMapper.selectById(questionSubmitedId);
         }
         if (judgeResult.equals(JudgeInfoMessageEnum.MEMORY_LIMIT_EXCEEDED.getValue())) {
+            JudgeInfo memoryLimitExceededJudgeInfo = new JudgeInfo("内存溢出",0L,0L);
             questionSubmit.setJudgeStatus(6);
             questionSubmit.setUpdateTime(new Date());
+            questionSubmit.setJudgeInfo(JSONUtil.toJsonStr(memoryLimitExceededJudgeInfo));
             if (questionSubmitMapper.updateById(questionSubmit) < 0) {
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR,"题目提交状态更新失败!");
             }
             return questionSubmitMapper.selectById(questionSubmitedId);
         }
         if (judgeResult.equals(JudgeInfoMessageEnum.OUTPUT_LIMIT_MISSING.getValue())) {
+            JudgeInfo outputLimitMissingJudgeInfo = new JudgeInfo("输出缺失",0L,0L);
             questionSubmit.setJudgeStatus(7);
             questionSubmit.setUpdateTime(new Date());
+            questionSubmit.setJudgeInfo(JSONUtil.toJsonStr(outputLimitMissingJudgeInfo));
             if (questionSubmitMapper.updateById(questionSubmit) < 0) {
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR,"题目提交状态更新失败!");
             }
             return questionSubmitMapper.selectById(questionSubmitedId);
         }
         if (judgeResult.equals(JudgeInfoMessageEnum.OUTPUT_LIMIT_EXCEEDED.getValue())) {
+            JudgeInfo outputLimitExceededJudgeInfo = new JudgeInfo("输出溢出",0L,0L);
             questionSubmit.setJudgeStatus(8);
             questionSubmit.setUpdateTime(new Date());
+            questionSubmit.setJudgeInfo(JSONUtil.toJsonStr(outputLimitExceededJudgeInfo));
             if (questionSubmitMapper.updateById(questionSubmit) < 0) {
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR,"题目提交状态更新失败!");
             }
