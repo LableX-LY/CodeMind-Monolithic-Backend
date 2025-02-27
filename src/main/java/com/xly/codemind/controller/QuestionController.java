@@ -6,10 +6,13 @@ import com.xly.codemind.common.BaseResponse;
 import com.xly.codemind.common.ErrorCode;
 import com.xly.codemind.exception.BusinessException;
 import com.xly.codemind.model.bean.Question;
+import com.xly.codemind.model.bean.QuestionSubmit;
 import com.xly.codemind.model.bean.User;
 import com.xly.codemind.model.dto.question.*;
 import com.xly.codemind.model.dto.questionsubmit.QuestionSubmitAddRequest;
+import com.xly.codemind.model.dto.questionsubmit.QuestionResultQueryPageRequest;
 import com.xly.codemind.model.vo.AdminQuestionVO;
+import com.xly.codemind.model.vo.QuestionResultVO;
 import com.xly.codemind.model.vo.UserQuestionVO;
 import com.xly.codemind.service.QuestionService;
 import com.xly.codemind.service.QuestionSubmitService;
@@ -37,7 +40,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/question")
 @Slf4j
-@CrossOrigin(origins = "http://localhost:8082", allowCredentials = "true")
+@CrossOrigin(origins = "http://localhost:8080", allowCredentials = "true")
 public class QuestionController {
 
     @Resource
@@ -54,26 +57,26 @@ public class QuestionController {
 
     @PostMapping("/add")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "request",required = true,value = "HttpServletRequest请求")
+            @ApiImplicitParam(name = "request", required = true, value = "HttpServletRequest请求")
     })
-    @ApiOperation(value = "添加题目接口",notes = "添加题目接口")
+    @ApiOperation(value = "添加题目接口", notes = "添加题目接口")
     public BaseResponse<Long> addQuestion(@RequestBody AddQuestionRequest addQuestionRequest, HttpServletRequest request) {
         if (addQuestionRequest == null || request == null) {
-            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"参数为空!");
+            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR, "参数为空!");
         }
         String questionTitle = addQuestionRequest.getQuestionTitle();
         String questionContent = addQuestionRequest.getQuestionContent();
         List<String> questionTags = addQuestionRequest.getQuestionTags();
         if (questionTags == null) {
-            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"题目标签为空!");
+            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR, "题目标签为空!");
         }
         List<JudgeCase> judgeCase = addQuestionRequest.getJudgeCase();
         if (judgeCase == null) {
-            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"判题用例为空!");
+            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR, "判题用例为空!");
         }
         JudgeConfig judgeConfig = addQuestionRequest.getJudgeConfig();
         if (judgeConfig == null) {
-            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"判题配置为空!");
+            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR, "判题配置为空!");
         }
         String questionTagsJsonString = GSON.toJson(questionTags);
         String judgeCaseObjectJsonString = GSON.toJson(judgeCase);
@@ -81,31 +84,31 @@ public class QuestionController {
         String questionAnswer = addQuestionRequest.getQuestionAnswer();
         int questionDifficulty = addQuestionRequest.getQuestionDifficulty();
         if (questionDifficulty < 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"题目难度设置错误!");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "题目难度设置错误!");
         }
         Long questionId = questionService.addQuestion(questionTitle, questionContent, questionAnswer, questionTagsJsonString, judgeCaseObjectJsonString, judgeConfigObjectJsonString, questionDifficulty, request);
         return ActionResultUtil.success(questionId);
     }
 
     @PostMapping("/delete")
-    @ApiImplicitParam(name = "questionId",required = true,value = "题目id")
-    @ApiOperation(value = "删除题目接口",notes = "删除题目接口")
+    @ApiImplicitParam(name = "questionId", required = true, value = "题目id")
+    @ApiOperation(value = "删除题目接口", notes = "删除题目接口")
     public BaseResponse<Boolean> deleteQuestion(long questionId) {
         if (questionId < 0) {
-            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"题目id为空!");
+            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR, "题目id为空!");
         }
         return ActionResultUtil.success(questionService.deleteQuestion(questionId));
     }
 
     @PostMapping("/edit")
-    @ApiOperation(value = "修改题目信息",notes = "修改题目信息")
+    @ApiOperation(value = "修改题目信息", notes = "修改题目信息")
     public BaseResponse<Boolean> editQuestion(@RequestBody EditQuestionRequest editQuestionRequest, HttpServletRequest request) {
         if (editQuestionRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"参数为空!");
+            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR, "参数为空!");
         }
         long questionId = editQuestionRequest.getQuestionId();
         if (questionId < 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"题目id有误!");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "题目id有误!");
         }
         String questionTitle = editQuestionRequest.getQuestionTitle();
         String questionContent = editQuestionRequest.getQuestionContent();
@@ -113,7 +116,7 @@ public class QuestionController {
         List<JudgeCase> judgeCase = editQuestionRequest.getJudgeCase();
         JudgeConfig judgeConfig = editQuestionRequest.getJudgeConfig();
         if (questionTags == null || judgeCase == null || judgeConfig == null) {
-            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"题目信息设置有误!");
+            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR, "题目信息设置有误!");
         }
         String questionTagsJsonString = GSON.toJson(questionTags);
         String judgeCaseObjectJsonString = GSON.toJson(judgeCase);
@@ -121,14 +124,14 @@ public class QuestionController {
         String questionAnswer = editQuestionRequest.getQuestionAnswer();
         Integer questionStatus = editQuestionRequest.getQuestionStatus();
         int questionDifficulty = editQuestionRequest.getQuestionDifficulty();
-        if (StringUtils.isAnyBlank(questionTitle,questionContent,questionAnswer,questionTagsJsonString,judgeCaseObjectJsonString,judgeConfigObjectJsonString)) {
-            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"题目信息设置有误!");
+        if (StringUtils.isAnyBlank(questionTitle, questionContent, questionAnswer, questionTagsJsonString, judgeCaseObjectJsonString, judgeConfigObjectJsonString)) {
+            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR, "题目信息设置有误!");
         }
         if (questionDifficulty < 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"题目难度设置错误!");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "题目难度设置错误!");
         }
         if (questionStatus == null || questionStatus < 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"题目状态设置有误!");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "题目状态设置有误!");
         }
         Boolean result = questionService.editQuestion(questionId, questionTitle, questionContent, questionAnswer, questionTagsJsonString, judgeCaseObjectJsonString, judgeConfigObjectJsonString, questionDifficulty, questionStatus, request);
         return ActionResultUtil.success(result);
@@ -136,10 +139,10 @@ public class QuestionController {
 
     //普通用户分页查询题目
     @PostMapping("/user/list/page")
-    @ApiOperation(value = "普通用户分页查询题目",notes = "普通用户分页查询题目")
+    @ApiOperation(value = "普通用户分页查询题目", notes = "普通用户分页查询题目")
     public BaseResponse<Page<UserQuestionVO>> getUserQuestionVOByPage(@RequestBody UserQueryQuestionRequest userQueryQuestionRequest) {
         if (userQueryQuestionRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"请求参数错误!");
+            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR, "请求参数错误!");
         }
         long current = userQueryQuestionRequest.getCurrent();
         long size = userQueryQuestionRequest.getPageSize();
@@ -151,10 +154,10 @@ public class QuestionController {
 
     //管理员分页查询题目
     @PostMapping("/admin/list/page")
-    @ApiOperation(value = "管理员分页查询题目",notes = "管理员分页查询题目")
+    @ApiOperation(value = "管理员分页查询题目", notes = "管理员分页查询题目")
     public BaseResponse<Page<AdminQuestionVO>> getAdminQuestionByPage(@RequestBody AdminQueryQuestionRequest adminQueryQuestionRequest) {
         if (adminQueryQuestionRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"请求参数错误!");
+            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR, "请求参数错误!");
         }
         long current = adminQueryQuestionRequest.getCurrent();
         long size = adminQueryQuestionRequest.getPageSize();
@@ -164,27 +167,65 @@ public class QuestionController {
         return ActionResultUtil.success(adminQuestionVOByPage);
     }
 
+    @PostMapping("/result/list/page")
+    @ApiOperation(value = "分页查询题目提交结果", notes = "分页查询题目提交结果")
+    public BaseResponse<Page<QuestionResultVO>> getQuestionSubmitByPage(@RequestBody QuestionResultQueryPageRequest questionResultQueryPageRequest) {
+        if (questionResultQueryPageRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR);
+        }
+        long current = questionResultQueryPageRequest.getCurrent();
+        long size = questionResultQueryPageRequest.getPageSize();
+        Page<QuestionSubmit> questionSubmitPageQueryWrapper = questionSubmitService.page(new Page<>(current,size),
+                questionSubmitService.getQuestionSubmitQueryWrapper(questionResultQueryPageRequest));
+        Page<QuestionResultVO> questionResultVOByPage = questionSubmitService.getQuestionSubmitVOByPage(questionSubmitPageQueryWrapper);
+        return ActionResultUtil.success(questionResultVOByPage);
+    }
+
     @PostMapping("/submit")
     @ApiOperation(value = "用户提交代码,发起判题请求", notes = "用户提交代码,发起判题请求")
     public BaseResponse<Long> doQuestionSubmit(@RequestBody QuestionSubmitAddRequest questionSubmitAddRequest,
                                                HttpServletRequest request) {
         if (questionSubmitAddRequest == null || request == null) {
-            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"请求参数错误!");
+            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR, "请求参数错误!");
         }
         //只有在登录的前提下才可以答题
         User loginUser = userService.getLoginUser(request);
         if (loginUser == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"用户未登录,请先登录!");
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR, "用户未登录,请先登录!");
         }
         Long questionId = questionSubmitAddRequest.getQuestionId();
         String questionCode = questionSubmitAddRequest.getQuestionCode();
         String questionLanguage = questionSubmitAddRequest.getQuestionLanguage();
         String questionTitle = questionSubmitAddRequest.getQuestionTitle();
-        if (ObjectUtils.isEmpty(questionId) || questionId < 0 ||StringUtils.isAnyBlank(questionCode,questionLanguage,questionTitle)) {
-            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR,"请求参数错误!");
+        if (ObjectUtils.isEmpty(questionId) || questionId < 0 || StringUtils.isAnyBlank(questionCode, questionLanguage, questionTitle)) {
+            throw new BusinessException(ErrorCode.PARAMS_NULL_ERROR, "请求参数错误!");
         }
-        Long questionSubmitedId = questionSubmitService.doQuestionSubmit(questionId,questionCode,questionLanguage,loginUser);
+        Long questionSubmitedId = questionSubmitService.doQuestionSubmit(questionId, questionCode, questionLanguage, loginUser);
         return ActionResultUtil.success(questionSubmitedId);
     }
+
+    // todo 通过ID查询题目信息
+    @GetMapping("/get/id")
+    @ApiOperation(value = "通过id查询题目", notes = "通过id查询题目")
+    public BaseResponse<AdminQuestionVO> getAdminQuestionVOById(String id, HttpServletRequest request) {
+        long questionId = Long.parseLong(id);
+        if (questionId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "题目id错误");
+        }
+        Question question = questionService.getById(questionId);
+        if (question == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // User loginUser = userService.getLoginUser(request);
+        // 不是本人或管理员，不能直接获取所有信息
+//        if (!question.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+//            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+//        }
+//        AdminQuestionVO adminQuestionVO = new AdminQuestionVO();
+//        BeanUtils.copyProperties(question,adminQuestionVO);
+        AdminQuestionVO JSONadminQuestionVO = AdminQuestionVO.objToVo(question);
+        return ActionResultUtil.success(JSONadminQuestionVO);
+    }
+
 
 }

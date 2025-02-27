@@ -62,7 +62,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         }
         Question question = new Question();
         // todo 只有管理员才可以添加题目
-        question.setId(IdWorkerUtil.generateId());
+        //question.setId(IdWorkerUtil.generateId());
         question.setQuestionTitle(questionTitle);
         question.setQuestionContent(questionContent);
         question.setQuestionAnswer(questionAnswer);
